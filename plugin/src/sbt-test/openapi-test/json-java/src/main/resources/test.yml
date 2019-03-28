@@ -1,0 +1,88 @@
+openapi: 3.0.0
+
+info:
+  title: Test Simple
+  version: 0.0.1
+
+servers:
+  - url: /api/v1
+    description: Current host
+
+paths:
+
+components:
+  schemas:
+    Room:
+      description: |
+        A room with some properties.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        seats:
+          type: integer
+          format: int32
+
+    Person:
+      description: |
+        A person.
+      required:
+        - lastname
+      properties:
+        firstname:
+          description: |
+            The first name of the person.
+          type: string
+        lastname:
+          description: |
+            The last name of the person.
+          type: string
+        dob:
+          description: |
+            The date of birth of a person.
+          type: string
+          format: date
+
+    Course:
+      description: |
+        A course.
+      required:
+        - id
+        - starts
+        - room
+      properties:
+        id:
+          description: |
+            A unique id for this course.
+          type: string
+        starts:
+          description: |
+            The date when this course starts.
+          type: string
+          format: date
+        room:
+          $ref: '#/components/schemas/Room'
+        members:
+          description: |
+            A list of members currently enrolled in this course.
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+
+    NestedArray:
+      description: |
+        Test nested array.
+      properties:
+        matrix:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+              format: int32
+
+    SimpleString:
+      description:
+        This is just a string.
+      type: string
