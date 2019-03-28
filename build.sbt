@@ -5,7 +5,6 @@ scalaVersion in ThisBuild := "2.12.8"
 val sharedSettings = Seq(
   name := "sbt-openapi-schema",
   organization := "com.github.eikek",
-  version := "0.1.0-SNAPSHOT",
   scalaVersion := "2.12.8",
   licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
   homepage := Some(url("https://github.com/eikek")),
