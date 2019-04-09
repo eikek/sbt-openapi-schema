@@ -23,6 +23,11 @@ components:
         seats:
           type: integer
           format: int32
+        roomUri:
+          description: |
+            A uri for looking up this room in a cataloge.
+          type: string
+          format: uri
 
     Person:
       description: |
@@ -41,6 +46,11 @@ components:
             The date of birth of a person.
           type: string
           format: date
+        homepage:
+          description: |
+            The home page url of that person.
+          type: string
+          format: url
 
     Course:
       description: |

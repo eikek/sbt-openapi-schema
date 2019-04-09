@@ -16,6 +16,8 @@ object ScalaCode {
       Type.Float32 -> TypeDef("Float", Imports.empty),
       Type.Float64 -> TypeDef("Double", Imports.empty),
       Type.Uuid -> TypeDef("UUID", Imports("java.util.UUID")),
+      Type.Url -> TypeDef("URL", Imports("java.net.URL")),
+      Type.Uri -> TypeDef("URI", Imports("java.net.URI")),
       Type.Date -> TypeDef("LocalDate", Imports("java.time.LocalDate")),
       Type.DateTime -> TypeDef("LocalDateTime", Imports("java.time.LocalDateTime")),
     )

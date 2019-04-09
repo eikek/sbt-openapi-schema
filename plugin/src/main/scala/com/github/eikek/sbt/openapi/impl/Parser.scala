@@ -64,6 +64,10 @@ object Parser {
         Type.String
       case _: EmailSchema =>
         Type.String
+      case s: StringSchema if "url".equalsIgnoreCase(s.getFormat) =>
+        Type.Url
+      case s: StringSchema if "uri".equalsIgnoreCase(s.getFormat) =>
+        Type.Uri
       case _: StringSchema =>
         Type.String
       case _: UUIDSchema =>
