@@ -86,3 +86,17 @@ components:
       description:
         This is just a string.
       type: string
+
+    ExtractedData1:
+      description: |
+        Contains data from extraction.
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Course'
+
+    ExtractedData2:
+      description: |
+        Contains data from extraction.
+      type: object
+      additionalProperties:
+        type: string

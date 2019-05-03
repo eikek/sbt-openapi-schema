@@ -15,6 +15,8 @@ object Main {
   def main(args: Array[String]): Unit = {
     List(new RoomDto("main room dto", 68)
       , new SimpleStringDto("bla bla bla")
+      , new ExtractedData1Dto(Map("c1" -> new CourseDto("course10", LocalDate.now, new RoomDto("heat room", 12), List(new PersonDto("hugo", "meyer", null)).asJava)).asJava)
+      , new ExtractedData2Dto(Map("c1" -> "x1", "c2" -> "x2").asJava)
       , new CourseDto("course10", LocalDate.now, new RoomDto("heat room", 12), List(new PersonDto("hugo", "meyer", null)).asJava),
       new NestedArrayDto(List(List[Integer](1, 2).asJava, List[Integer](30, 40).asJava).asJava)
     ).foreach(testJson _)

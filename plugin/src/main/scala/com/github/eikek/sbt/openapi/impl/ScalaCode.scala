@@ -51,7 +51,7 @@ object ScalaCode {
         constant[Superclass]("extends") ~ superclass,
         constant("with") ~ forListSep(superclass, Part(", "))
       )
-    constant("case class") ~ sourceName ~ constant("(") ++
+    constant("case class") ~ sourceName ~ forList(annotation, _ ++ _).contramap[SourceFile](_.ctorAnnot) ~ constant("(") ++
       forListSep(fieldPart, Part(", ")).map(_.indent(2)).contramap(_.fields) ++
       constant(")") ~ parents.map(_.newline).contramap(_.parents)
   }

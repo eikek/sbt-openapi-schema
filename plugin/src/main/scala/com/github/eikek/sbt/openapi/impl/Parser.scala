@@ -40,7 +40,7 @@ object Parser {
     p
   }
 
-  //TODO missing: BinarySchema, ByteArraySchema, ComposedSchema, FileSchema, MapSchema, ObjectSchema
+  //TODO missing: BinarySchema, ByteArraySchema, ComposedSchema, FileSchema, MapSchema
   def schemaType(sch: Schema[_]): Type =
     sch match {
       case s: ArraySchema =>
@@ -72,6 +72,20 @@ object Parser {
         Type.String
       case _: UUIDSchema =>
         Type.Uuid
+      case s: ObjectSchema if s.getAdditionalProperties != null =>
+        s.getAdditionalProperties match {
+          case ps: Schema[_] =>
+            Type.Map(Type.String, schemaType(ps))
+          case _ =>
+            sys.error("An object schema with value types `Object` and `AnyRef`, respectively, is not supported.")
+        }
+      case s: MapSchema if s.getAdditionalProperties != null =>
+        s.getAdditionalProperties match {
+          case ps: Schema[_] =>
+            Type.Map(Type.String, schemaType(ps))
+          case _ =>
+            sys.error("An object schema with value types `Object` and `AnyRef`, respectively, is not supported.")
+        }
       case s if s.get$ref != null =>
         Type.Ref(s.get$ref.split('/').last)
       case _ =>

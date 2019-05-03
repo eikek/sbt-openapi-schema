@@ -89,3 +89,17 @@ components:
             items:
               type: integer
               format: int32
+
+    ExtractedData1:
+      description: |
+        Contains data from extraction.
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Course'
+
+    ExtractedData2:
+      description: |
+        Contains data from extraction.
+      type: object
+      additionalProperties:
+        type: string

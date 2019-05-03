@@ -21,6 +21,7 @@ object SchemaClass {
       , pkg = pkg
       , imports = Imports.empty
       , annot = Nil
+      , ctorAnnot = Nil
       , doc = sc.doc
       , fields = sc.properties.map(p => Field(p, Nil, tm(p.`type`).getOrElse(sys.error(s"No type for: $p"))))
       , wrapper = sc.wrapper).

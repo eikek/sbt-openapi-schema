@@ -107,6 +107,7 @@ object JavaCode {
     }
 
     def constructor: PartConv[SourceFile] =
+      forList(annotation, _ ++ _).contramap[SourceFile](_.ctorAnnot) ++
       constant("public") ~ string.contramap[SourceFile](_.name) + constant("(") +
         typeNameList.contramap(_.fields) + constant(") {") ++
         fieldAssignList.contramap[SourceFile](_.fields).map(_.indent(2)) ++ constant("}")

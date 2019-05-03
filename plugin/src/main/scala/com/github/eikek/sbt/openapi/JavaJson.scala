@@ -34,8 +34,9 @@ object JavaJson {
 
     def resolve(src: SourceFile): SourceFile =
       if (src.wrapper) {
-        src.addImports(Imports("com.fasterxml.jackson.annotation.JsonValue")).
-          copy(fields = src.fields.map(f => Field(f.prop, List(Annotation("@JsonValue")), f.typeDef)))
+        src.addImports(Imports("com.fasterxml.jackson.annotation.JsonValue", "com.fasterxml.jackson.annotation.JsonCreator")).
+          copy(fields = src.fields.map(f => Field(f.prop, List(Annotation("@JsonValue")), f.typeDef))).
+          addCtorAnnotation(Annotation("@JsonCreator"))
       } else {
         src.addAnnotation(jacksonDeserializer(src)).
           addAnnotation(jacksonIgnore(src)).
