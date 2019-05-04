@@ -59,7 +59,7 @@ object OpenApiSchema extends AutoPlugin {
     val schemas = Parser.parse(spec.toString).values.toList
 
     IO.createDirectories(Seq(targetPath))
-    schemas.map { sc =>
+    val files = schemas.map { sc =>
       val (name, code) =
         if (lang == Language.Scala) ScalaCode.generate(sc, pkg, cfgScala)
         else JavaCode.generate(sc, pkg, cfgJava)
@@ -70,5 +70,13 @@ object OpenApiSchema extends AutoPlugin {
       }
       file
     }
+    IO.listFiles(targetPath).
+      filter(f => !files.contains(f)).
+      foreach { f =>
+        logger.info(s"Deleting unused file $f")
+        IO.delete(f)
+      }
+
+    files
   }
 }
