@@ -33,5 +33,17 @@ object CustomMapping {
   def forName(f: PartialFunction[String, String]): CustomMapping =
     forSource({ case s => s.copy(name = f.lift(s.name).getOrElse(s.name)) })
 
+  def forField(f: PartialFunction[Field, Field]): CustomMapping =
+    forSource({ case s =>
+      val newFields = s.fields.map(field => f.lift(field).getOrElse(field))
+      s.copy(fields = newFields)
+    })
+
+  def forFormatType(f: PartialFunction[String, Field => Field]): CustomMapping =
+    forField {
+      case field if f.isDefinedAt(field.prop.format) =>
+        f(field.prop.format)(field)
+    }
+
   val none = apply(PartialFunction.empty, PartialFunction.empty)
 }
