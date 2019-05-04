@@ -70,6 +70,7 @@ object JavaCode {
         constant("}")
 
     def setter: PartConv[Field] =
+      doc.contramap[Field](_.prop.doc) ++
       constant("public Builder set") + fieldName.map(_.capitalize) + constant("(") + DataClass.fieldType ~
         constant("value) {") ++ constant("this.").map(_.indent(2)) + fieldName ~ constant(" = value;") ++
         constant("return this;").map(_.indent(2)) ++
