@@ -27,6 +27,12 @@ object SchemaClass {
       , wrapper = sc.wrapper).
       modify(cm.changeSource).
       modify(s => s.addImports(Imports.flatten(s.parents.map(_.imports)))).
-      modify(TypeMapping.resolveFieldImports(tm))
+      modify(resolveFieldImports)
   }
+
+  private def resolveFieldImports(src: SourceFile): SourceFile =
+    src.fields.map(_.typeDef).
+      foldLeft(src){ (s, td) =>
+        s.addImports(td.imports)
+      }
 }

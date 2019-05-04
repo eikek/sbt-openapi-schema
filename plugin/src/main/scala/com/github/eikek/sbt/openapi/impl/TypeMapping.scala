@@ -14,10 +14,4 @@ object TypeMapping {
     val m = (t :: ts.toList).toMap
     t: Type => m.get(t)
   }
-
-  def resolveFieldImports(tm: TypeMapping)(src: SourceFile): SourceFile =
-    src.fields.map(_.prop.`type`).
-      foldLeft(src){ (s, t) =>
-        tm(t).map(_.imports).map(s.addImports).getOrElse(s)
-      }
 }
