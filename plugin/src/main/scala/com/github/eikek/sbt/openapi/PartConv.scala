@@ -28,8 +28,11 @@ trait PartConv[A] { self =>
 object PartConv {
   def apply[A](f: A => Part): PartConv[A] = a => f(a)
 
+  def ofPart[A](p: Part): PartConv[A] =
+    PartConv(_ => p)
+
   def of[A](str: String): PartConv[A] =
-    PartConv(_ => Part(str))
+    ofPart(Part(str))
 
   def constant[A](str: String): PartConv[A] = of(str)
 

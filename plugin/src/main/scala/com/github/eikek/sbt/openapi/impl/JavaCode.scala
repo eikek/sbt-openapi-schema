@@ -84,6 +84,7 @@ object JavaCode {
         fieldDeclaration("private final").map(_.indent(2).newline).contramap[SourceFile](_.fields) ++
         constructor.map(_.indent(2).newline) ++
         forList(getter, _ ++ _).map(_.indent(2).newline).contramap(_.fields) ++
+        setter ++
         equals.map(_.newline) ++
         hashcode.map(_.indent(2).newline) ++
         tostring.map(_.indent(2).newline) ++
@@ -126,6 +127,16 @@ object JavaCode {
         constant("}").map(_.newline)
 
       cond[Field](_.prop.nullable, fg ++ opt, doc.contramap[Field](_.prop.doc) ++ constant("public") ~ fg)
+    }
+
+    def setter: PartConv[SourceFile] = PartConv { sc =>
+      def withMethod: PartConv[Field] =
+        doc.contramap[Field](_.prop.doc) ++
+        constant("public") ~ constant(sc.name) ~ constant("with") + fieldName.map(_.capitalize) + constant("(") + fieldType ~ fieldName + constant(") {") ++
+        constant("return new").map(_.indent(2)) ~ constant(sc.name) + constant("(")  + PartConv.ofPart(fieldNameList.toPart(sc.fields)) + constant(");") ++
+        constant("}").map(_.newline)
+
+      forList(withMethod, _ ++ _).map(_.indent(2).newline).toPart(sc.fields)
     }
 
     val hashcode: PartConv[SourceFile] =
