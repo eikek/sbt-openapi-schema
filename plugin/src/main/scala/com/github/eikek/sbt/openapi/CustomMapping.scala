@@ -30,8 +30,31 @@ object CustomMapping {
   def forSource(f: PartialFunction[SourceFile, SourceFile]): CustomMapping =
     apply(PartialFunction.empty, f)
 
-  def forName(f: PartialFunction[String, String]): CustomMapping =
-    forSource({ case s => s.copy(name = f.lift(s.name).getOrElse(s.name)) })
+  def forName(f: PartialFunction[String, String]): CustomMapping = {
+    def changeRef(field: Field): Field =
+      field.prop.`type` match {
+        case Type.Ref(name) =>
+          field.copy(prop = field.prop.copy(`type` = Type.Ref(f.lift(name).getOrElse(name))))
+        case Type.Sequence(Type.Ref(name)) =>
+          field.copy(prop = field.prop.copy(`type` = Type.Sequence(Type.Ref(f.lift(name).getOrElse(name)))))
+        case Type.Map(kt, vt) =>
+          val ktn = kt match {
+            case Type.Ref(name) => Type.Ref(f.lift(name).getOrElse(name))
+            case _ => kt
+          }
+          val vtn = vt match {
+            case Type.Ref(name) => Type.Ref(f.lift(name).getOrElse(name))
+            case _ => vt
+          }
+          field.copy(prop = field.prop.copy(`type` = Type.Map(ktn, vtn)))
+        case _ => field
+      }
+
+    forSource({ case s =>
+      s.copy(name = f.lift(s.name).getOrElse(s.name)).
+        copy(fields = s.fields.map(changeRef))
+    })
+  }
 
   def forField(f: PartialFunction[Field, Field]): CustomMapping =
     forSource({ case s =>
