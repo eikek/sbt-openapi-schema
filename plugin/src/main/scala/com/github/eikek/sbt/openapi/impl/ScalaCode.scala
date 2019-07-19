@@ -4,9 +4,6 @@ import com.github.eikek.sbt.openapi._
 import PartConv._
 
 object ScalaCode {
-  implicit def listPartConv[A](implicit c: PartConv[A]): PartConv[List[A]] =
-    PartConv.forList(c, _ ++ _)
-
   val primitiveTypeMapping: TypeMapping = {
     TypeMapping(
       Type.Bool -> TypeDef("Boolean", Imports.empty),
@@ -42,7 +39,7 @@ object ScalaCode {
   def caseClass: PartConv[SourceFile] = {
     val fieldPart: PartConv[Field] =
       cond(
-        f => f.prop.nullable && !f.prop.`type`.isCollection,
+        f => f.nullablePrimitive,
         fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
         fieldName + PartConv.of(": ") + fieldType
       )
