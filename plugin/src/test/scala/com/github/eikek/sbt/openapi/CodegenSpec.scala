@@ -40,4 +40,16 @@ object CodegenSpec extends SimpleTestSuite {
       println(JavaCode.generate(sc, Pkg("com.test"), config)._2)
     }
   }
+
+  test("Running elm") {
+    val config = ElmConfig.default.
+      addMapping(CustomMapping.forName({ case name => name+"Dto" })).
+      withJson(ElmJson.decodePipeline)
+
+    println("=========")
+    schema.values.foreach { sc =>
+      println("-------------------------------------------------")
+      println(ElmCode.generate(sc, Pkg("Api.Data"), config))
+    }
+  }
 }

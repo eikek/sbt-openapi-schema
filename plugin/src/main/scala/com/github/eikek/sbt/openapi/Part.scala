@@ -44,6 +44,12 @@ case class Part(cnt: String) {
   def capitalize: Part =
     Part(render.capitalize)
 
+  def lower: Part =
+    Part(render.toLowerCase)
+
+  def quoted: Part =
+    Part(s""""$render"""")
+
   def isEmpty: Boolean =
     cnt.trim.isEmpty
 
@@ -53,4 +59,7 @@ case class Part(cnt: String) {
 
 object Part {
   val empty = Part("")
+
+  def concat(p0: Part, ps: Part*): Part =
+    Part((p0 :: ps.toList).map(_.cnt).foldLeft("")(_ + _))
 }
