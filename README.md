@@ -3,15 +3,12 @@
 This is an sbt plugin to generate Scala, Java or Elm code given an
 openapi 3.x specification. Unlike other codegen tools, this focuses
 only on the `#/components/schema` section. Also, it generates
-immutable classes (scala and java) and optionally the corresponding
-JSON conversions.
-
-It generates Scala, Java or Elm code:
+immutable classes and optionally the corresponding JSON conversions.
 
 - Scala: `case class`es are generated and JSON conversion via circe.
 - Java: immutable classes (with builder pattern) are generated and
   JSON conversion via jackson (requires jackson > 2.9).
-- Elm: (experimental) type aliases are generated and constructors for
+- Elm: (experimental) records are generated and constructors for
   "empty" values. It works only for objects. JSON conversion is
   generated using Elm's default encoding support and the
   [json-decode-pipeline](https://github.com/NoRedInk/elm-json-decode-pipeline)
@@ -30,7 +27,7 @@ It is possible to customize the code generation.
 Add this plugin to your build in `project/plugins.sbt`:
 
 ```
-addSbtPlugin("com.github.eikek" % "sbt-openapi-schema" % "0.1.0")
+addSbtPlugin("com.github.eikek" % "sbt-openapi-schema" % "0.4.0")
 ```
 
 Then enable the plugin in some project:
@@ -41,9 +38,11 @@ enablePlugins(OpenApiSchema)
 
 There are two required settings: `openapiSpec` and
 `openapiTargetLanguage`. The first defines the openapi.yml file and
-the other is either `Language.Java` or `Language.Scala`:
+the other is a constant from the `Language` object:
 
 ```
+import com.github.eikek.sbt.openapi._
+
 project.
   enablePlugins(OpenApiSchema).
   settings(
@@ -57,6 +56,9 @@ task `openapiCodegen` can be used to run the generation independent
 from the `compile` task.
 
 ## Configuration
+
+The configuration is specific to the target language. There exists a
+separate configuration object for Java, Scala and Elm.
 
 The key `openapiJavaConfig` and `openapiScalaConfig` define some
 configuration to customize the code generation.
@@ -85,7 +87,7 @@ By default, no JSON support is added to the generated classes. This
 can be changed via:
 
 ```
-openapiJavaConfig := JavaConfig.default.copy(json = JavaJson.jackson)
+openapiJavaConfig := JavaConfig.default.withJson(JavaJson.jackson)
 ```
 
 This generates the required annotations for jackson. Note, that this
@@ -113,6 +115,8 @@ trait CustomMapping { self =>
   }
 }
 ```
+
+There are convenient constructors in its companion object.
 
 It allows to use different types via `changeType` or change the source
 file. Here is a `build.sbt` example snippet:
