@@ -52,7 +52,7 @@ object ElmCode {
       case Type.Ref(name) =>
         val srcRef = SchemaClass(name)
         val refName = resolveSchema(srcRef, cm, pkg).name
-        Some(TypeDef(refName, Imports(s"${pkg.name}.$refName")))
+        Some(TypeDef(refName, Imports(s"${pkg.name}.$refName exposing ($refName)")))
       case t =>
         primitiveTypeMapping(t)
   }
