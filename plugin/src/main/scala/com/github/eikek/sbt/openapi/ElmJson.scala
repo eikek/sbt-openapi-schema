@@ -59,18 +59,18 @@ object ElmJson {
 
     def codecForField(dir: Direction): PartConv[(Pkg, Field)] = PartConv {
       case (pkg, field) =>
-        field.prop.`type` match {
+        val codec = field.prop.`type` match {
           case Type.Ref(_) =>
             if (dir == Direction.Dec) Part(s"${pkg.name}.${field.typeDef.name}.decoder")
             else Part(s"${pkg.name}.${field.typeDef.name}.encode")
           case _ =>
-            val inner = codecForType(dir, pkg, field.prop.`type`)
-            if (field.nullablePrimitive) {
-              if (dir == Direction.Dec) Part.concat(Part(s"(${dir.name}.maybe "), inner, Part(")"))
-              else Part.concat(Part("(Maybe.map "), inner, Part(" >> Maybe.withDefault Encode.null)"))
-            } else {
-              inner
-            }
+            codecForType(dir, pkg, field.prop.`type`)
+        }
+        if (field.nullablePrimitive) {
+          if (dir == Direction.Dec) Part.concat(Part(s"(${dir.name}.maybe "), codec, Part(")"))
+          else Part.concat(Part("(Maybe.map "), codec, Part(" >> Maybe.withDefault Encode.null)"))
+        } else {
+          codec
         }
       }
 
