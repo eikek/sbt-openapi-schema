@@ -16,32 +16,34 @@ object JavaCode {
       Type.Uuid -> TypeDef("UUID", Imports("java.util.UUID")),
       Type.Url -> TypeDef("URL", Imports("java.net.URL")),
       Type.Uri -> TypeDef("URI", Imports("java.net.URI")),
-      Type.Date -> TypeDef("LocalDate", Imports("java.time.LocalDate")),
-      Type.DateTime -> TypeDef("LocalDateTime", Imports("java.time.LocalDateTime")),
+      Type.Date(Type.TimeRepr.String) -> TypeDef("LocalDate", Imports("java.time.LocalDate")),
+      Type.Date(Type.TimeRepr.Number) -> TypeDef("LocalDate", Imports("java.time.LocalDate")),
+      Type.DateTime(Type.TimeRepr.String) -> TypeDef("LocalDateTime", Imports("java.time.LocalDateTime")),
+      Type.DateTime(Type.TimeRepr.Number) -> TypeDef("LocalDateTime", Imports("java.time.LocalDateTime"))
     )
   }
 
   def boxed(td: TypeDef): TypeDef = td match {
-    case TypeDef("boolean", is) => TypeDef("Boolean", is)
-    case TypeDef("int", is) => TypeDef("Integer", is)
-    case TypeDef("long", is) => TypeDef("Long", is)
-    case TypeDef("float", is) => TypeDef("Float", is)
-    case TypeDef("double", is) => TypeDef("Double", is)
+    case TypeDef("boolean", is, t) => TypeDef("Boolean", is, t)
+    case TypeDef("int", is, t) => TypeDef("Integer", is, t)
+    case TypeDef("long", is, t) => TypeDef("Long", is, t)
+    case TypeDef("float", is, t) => TypeDef("Float", is, t)
+    case TypeDef("double", is, t) => TypeDef("Double", is, t)
     case _ => td
   }
 
   def defaultTypeMapping(cm: CustomMapping): TypeMapping = {
-    case Type.Sequence(param) =>
+    case t@Type.Sequence(param) =>
       defaultTypeMapping(cm)(param).
-        map(el => cm.changeType(TypeDef(s"List<${boxed(el).name}>", el.imports ++ Imports("java.util.List"))))
-    case Type.Map(key, value) =>
+        map(el => cm.changeType(TypeDef(s"List<${boxed(el).name}>", el.imports ++ Imports("java.util.List"), t)))
+    case t@Type.Map(key, value) =>
       for {
         k <- defaultTypeMapping(cm)(key)
         v <- defaultTypeMapping(cm)(value)
-      } yield cm.changeType(TypeDef(s"Map<${boxed(k).name},${boxed(v).name}>", k.imports ++ v.imports ++ Imports("java.util.Map")))
-    case Type.Ref(name) =>
+      } yield cm.changeType(TypeDef(s"Map<${boxed(k).name},${boxed(v).name}>", k.imports ++ v.imports ++ Imports("java.util.Map"), t))
+    case t@Type.Ref(name) =>
       val schema = SchemaClass(name)
-      Some(TypeDef(resolveSchema(schema, cm).name, Imports.empty))
+      Some(TypeDef(resolveSchema(schema, cm).name, Imports.empty, t))
     case t =>
         primitiveTypeMapping(t).map(cm.changeType)
   }

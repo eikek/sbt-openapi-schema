@@ -15,23 +15,25 @@ object ScalaCode {
       Type.Uuid -> TypeDef("UUID", Imports("java.util.UUID")),
       Type.Url -> TypeDef("URL", Imports("java.net.URL")),
       Type.Uri -> TypeDef("URI", Imports("java.net.URI")),
-      Type.Date -> TypeDef("LocalDate", Imports("java.time.LocalDate")),
-      Type.DateTime -> TypeDef("LocalDateTime", Imports("java.time.LocalDateTime")),
+      Type.Date(Type.TimeRepr.String) -> TypeDef("LocalDate", Imports("java.time.LocalDate")),
+      Type.Date(Type.TimeRepr.Number) -> TypeDef("LocalDate", Imports("java.time.LocalDate")),
+      Type.DateTime(Type.TimeRepr.String) -> TypeDef("LocalDateTime", Imports("java.time.LocalDateTime")),
+      Type.DateTime(Type.TimeRepr.Number) -> TypeDef("LocalDateTime", Imports("java.time.LocalDateTime"))
     )
   }
 
   def defaultTypeMapping(cm: CustomMapping): TypeMapping =  {
-      case Type.Sequence(param) =>
+      case t@Type.Sequence(param) =>
         defaultTypeMapping(cm)(param).
-          map(el => cm.changeType(TypeDef(s"List[${el.name}]", el.imports)))
-      case Type.Map(key, value) =>
+          map(el => cm.changeType(TypeDef(s"List[${el.name}]", el.imports, t)))
+      case t@Type.Map(key, value) =>
         for {
           k <- defaultTypeMapping(cm)(key)
           v <- defaultTypeMapping(cm)(value)
-        } yield cm.changeType(TypeDef(s"Map[${k.name},${v.name}]", k.imports ++ v.imports))
-      case Type.Ref(name) =>
+        } yield cm.changeType(TypeDef(s"Map[${k.name},${v.name}]", k.imports ++ v.imports, t))
+      case t@Type.Ref(name) =>
         val srcRef = SchemaClass(name)
-        Some(TypeDef(resolveSchema(srcRef, cm).name, Imports.empty))
+        Some(TypeDef(resolveSchema(srcRef, cm).name, Imports.empty, t))
       case t =>
         primitiveTypeMapping(t).map(cm.changeType)
   }

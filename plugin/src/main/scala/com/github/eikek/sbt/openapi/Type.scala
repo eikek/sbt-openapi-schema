@@ -21,9 +21,15 @@ object Type {
   case object Uuid extends PrimitiveType
   case object Url extends PrimitiveType
   case object Uri extends PrimitiveType
-  case object Date extends PrimitiveType
-  case object DateTime extends PrimitiveType
+  case class Date(repr: TimeRepr) extends PrimitiveType
+  case class DateTime(repr: TimeRepr) extends PrimitiveType
   case class Sequence(param: Type) extends CollectionType
   case class Map(key: Type, value: Type) extends CollectionType
   case class Ref(name: String) extends PrimitiveType
+
+  sealed trait TimeRepr
+  object TimeRepr {
+    case object Number extends TimeRepr
+    case object String extends TimeRepr
+  }
 }

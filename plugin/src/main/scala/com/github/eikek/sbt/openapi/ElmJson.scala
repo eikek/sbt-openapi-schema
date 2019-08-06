@@ -53,6 +53,10 @@ object ElmJson {
         Part(s"${dir.name}.float")
       case Type.Float64 =>
         Part(s"${dir.name}.float")
+      case Type.DateTime(Type.TimeRepr.Number) =>
+        Part(s"${dir.name}.int")
+      case Type.Date(Type.TimeRepr.Number) =>
+        Part(s"${dir.name}.int")
       case _ =>
         Part(s"${dir.name}.string")
     }

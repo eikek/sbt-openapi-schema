@@ -65,7 +65,7 @@ object OpenApiSchema extends AutoPlugin {
       }
     )
 
-  private def generateCode(logger: Logger
+  def generateCode(logger: Logger
     , out: File
     , lang: Language
     , cfgJava: JavaConfig

@@ -35,6 +35,7 @@ object Parser {
   def makeProperty(name: String, schema: Schema[_], required: String => Boolean): Property = {
     val p = Property(name, schemaType(schema)
       , format = schema.getFormat.nullToEmpty
+      , pattern = schema.getPattern.nullToEmpty
       , nullable = schema.getNullable == true || !required(name)
       , doc = Doc(schema.getDescription.nullToEmpty))
     p
@@ -48,11 +49,13 @@ object Parser {
       case _: BooleanSchema =>
         Type.Bool
       case _: DateSchema =>
-        Type.Date
+        Type.Date(Type.TimeRepr.String)
       case _: DateTimeSchema =>
-        Type.DateTime
+        Type.DateTime(Type.TimeRepr.String)
       case s: IntegerSchema =>
-        if (s.getFormat == "int64") Type.Int64
+        if ("int64" == s.getFormat) Type.Int64
+        else if ("date-time" == s.getFormat) Type.DateTime(Type.TimeRepr.Number)
+        else if ("date" == s.getFormat) Type.Date(Type.TimeRepr.Number)
         else Type.Int32
       case s: NumberSchema =>
         s.getFormat.nullToEmpty.toLowerCase match {
