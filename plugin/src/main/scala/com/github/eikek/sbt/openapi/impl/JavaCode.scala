@@ -43,7 +43,7 @@ object JavaCode {
       val schema = SchemaClass(name)
       Some(TypeDef(resolveSchema(schema, cm).name, Imports.empty))
     case t =>
-        primitiveTypeMapping(t)
+        primitiveTypeMapping(t).map(cm.changeType)
   }
 
   object BuilderClass {

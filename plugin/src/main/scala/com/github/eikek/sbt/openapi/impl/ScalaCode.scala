@@ -33,7 +33,7 @@ object ScalaCode {
         val srcRef = SchemaClass(name)
         Some(TypeDef(resolveSchema(srcRef, cm).name, Imports.empty))
       case t =>
-        primitiveTypeMapping(t)
+        primitiveTypeMapping(t).map(cm.changeType)
   }
 
   def caseClass: PartConv[SourceFile] = {

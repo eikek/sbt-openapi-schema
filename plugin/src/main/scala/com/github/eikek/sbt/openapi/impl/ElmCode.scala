@@ -54,7 +54,7 @@ object ElmCode {
         val refName = resolveSchema(srcRef, cm, pkg).name
         Some(TypeDef(refName, Imports(s"${pkg.name}.$refName exposing ($refName)")))
       case t =>
-        primitiveTypeMapping(t)
+        primitiveTypeMapping(t).map(cm.changeType)
   }
 
   def typeAlias: PartConv[SourceFile] = {
