@@ -32,29 +32,29 @@ object ElmCode {
 
   def emptyValue(pkg: Pkg): PartConv[TypeDef] =
     PartConv {
-      case TypeDef("Bool", _, _) => Part("False")
-      case TypeDef("String", _, _) => Part("\"\"")
-      case TypeDef("Int", _, _) => Part("0")
-      case TypeDef("Float", _, _) => Part("0.0")
-      case TypeDef(n, _, _) if n startsWith "Maybe" => Part("Nothing")
-      case TypeDef(n, _, _) if n startsWith "(List" => Part("[]")
-      case TypeDef(n, _, _) if n startsWith "(Dict" => Part("Dict.empty")
-      case TypeDef(name, _, _) => Part(s"${pkg.name}.$name.empty")
+      case TypeDef("Bool", _) => Part("False")
+      case TypeDef("String", _) => Part("\"\"")
+      case TypeDef("Int", _) => Part("0")
+      case TypeDef("Float", _) => Part("0.0")
+      case TypeDef(n, _) if n startsWith "Maybe" => Part("Nothing")
+      case TypeDef(n, _) if n startsWith "(List" => Part("[]")
+      case TypeDef(n, _) if n startsWith "(Dict" => Part("Dict.empty")
+      case TypeDef(name, _) => Part(s"${pkg.name}.$name.empty")
     }
 
   def defaultTypeMapping(cm: CustomMapping, pkg: Pkg): TypeMapping =  {
-      case t@Type.Sequence(param) =>
+      case Type.Sequence(param) =>
         defaultTypeMapping(cm, pkg)(param).
-          map(el => cm.changeType(TypeDef(s"(List ${el.name})", el.imports, t)))
-      case t@Type.Map(key, value) =>
+          map(el => cm.changeType(TypeDef(s"(List ${el.name})", el.imports)))
+      case Type.Map(key, value) =>
         for {
           k <- defaultTypeMapping(cm, pkg)(key)
           v <- defaultTypeMapping(cm, pkg)(value)
-        } yield cm.changeType(TypeDef(s"(Dict ${k.name},${v.name})", k.imports ++ v.imports ++ Imports("Dict"), t))
-      case t@Type.Ref(name) =>
+        } yield cm.changeType(TypeDef(s"(Dict ${k.name},${v.name})", k.imports ++ v.imports ++ Imports("Dict")))
+      case Type.Ref(name) =>
         val srcRef = SchemaClass(name)
         val refName = resolveSchema(srcRef, cm, pkg).name
-        Some(TypeDef(refName, Imports(s"${pkg.name}.$refName exposing ($refName)"), t))
+        Some(TypeDef(refName, Imports(s"${pkg.name}.$refName exposing ($refName)")))
       case t =>
         primitiveTypeMapping(t).map(cm.changeType)
   }

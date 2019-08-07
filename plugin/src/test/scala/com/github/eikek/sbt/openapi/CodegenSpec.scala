@@ -23,8 +23,8 @@ object CodegenSpec extends SimpleTestSuite {
   test("Running java") {
     val typeMapping: CustomMapping =
       CustomMapping.forType {
-        case TypeDef(s, _, t) if s.startsWith("List<") =>
-          TypeDef(s.replaceFirst("List", "PList"), Imports("ch.bluecare.commons.data.PList"), t)
+        case TypeDef(s, _) if s.startsWith("List<") =>
+          TypeDef(s.replaceFirst("List", "PList"), Imports("ch.bluecare.commons.data.PList"))
       }
 
     val config = JavaConfig.default.

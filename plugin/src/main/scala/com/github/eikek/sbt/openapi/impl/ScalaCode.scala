@@ -23,17 +23,17 @@ object ScalaCode {
   }
 
   def defaultTypeMapping(cm: CustomMapping): TypeMapping =  {
-      case t@Type.Sequence(param) =>
+      case Type.Sequence(param) =>
         defaultTypeMapping(cm)(param).
-          map(el => cm.changeType(TypeDef(s"List[${el.name}]", el.imports, t)))
-      case t@Type.Map(key, value) =>
+          map(el => cm.changeType(TypeDef(s"List[${el.name}]", el.imports)))
+      case Type.Map(key, value) =>
         for {
           k <- defaultTypeMapping(cm)(key)
           v <- defaultTypeMapping(cm)(value)
-        } yield cm.changeType(TypeDef(s"Map[${k.name},${v.name}]", k.imports ++ v.imports, t))
-      case t@Type.Ref(name) =>
+        } yield cm.changeType(TypeDef(s"Map[${k.name},${v.name}]", k.imports ++ v.imports))
+      case Type.Ref(name) =>
         val srcRef = SchemaClass(name)
-        Some(TypeDef(resolveSchema(srcRef, cm).name, Imports.empty, t))
+        Some(TypeDef(resolveSchema(srcRef, cm).name, Imports.empty))
       case t =>
         primitiveTypeMapping(t).map(cm.changeType)
   }
