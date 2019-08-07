@@ -34,8 +34,8 @@ object Parser {
 
   def makeProperty(name: String, schema: Schema[_], required: String => Boolean): Property = {
     val p = Property(name, schemaType(schema)
-      , format = schema.getFormat.nullToEmpty
-      , pattern = schema.getPattern.nullToEmpty
+      , format = schema.getFormat.asNonEmpty
+      , pattern = schema.getPattern.asNonEmpty
       , nullable = schema.getNullable == true || !required(name)
       , doc = Doc(schema.getDescription.nullToEmpty))
     p

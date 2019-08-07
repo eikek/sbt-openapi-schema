@@ -64,8 +64,8 @@ object CustomMapping {
 
   def forFormatType(f: PartialFunction[String, Field => Field]): CustomMapping =
     forField {
-      case field if f.isDefinedAt(field.prop.format) =>
-        f(field.prop.format)(field)
+      case field if f.isDefinedAt(field.prop.format.getOrElse("")) =>
+        f(field.prop.format.getOrElse(""))(field)
     }
 
   val none = apply(PartialFunction.empty, PartialFunction.empty)

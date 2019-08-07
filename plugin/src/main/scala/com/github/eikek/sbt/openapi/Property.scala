@@ -3,8 +3,8 @@ package com.github.eikek.sbt.openapi
 case class Property(name: String
   , `type`: Type
   , nullable: Boolean = false
-  , format: String = ""
-  , pattern: String = ""
+  , format: Option[String] = None
+  , pattern: Option[String] = None
   , doc: Doc = Doc.empty) {
 
   def optional: Property =
