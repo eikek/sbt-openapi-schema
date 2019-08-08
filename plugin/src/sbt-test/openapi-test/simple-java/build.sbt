@@ -9,6 +9,6 @@ openapiTargetLanguage := Language.Java
 openapiSpec := (Compile/resourceDirectory).value/"test.yml"
 openapiJavaConfig := JavaConfig.default.
   addMapping(CustomMapping.forType({
-    case TypeDef("LocalDate", _, t)  =>
-      TypeDef("Instant", Imports("java.time.Instant"), t)
+    case TypeDef("LocalDate", _)  =>
+      TypeDef("Instant", Imports("java.time.Instant"))
   }))
