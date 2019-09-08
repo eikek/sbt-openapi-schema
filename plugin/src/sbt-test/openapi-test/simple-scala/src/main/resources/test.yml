@@ -9,6 +9,12 @@ servers:
     description: Current host
 
 paths:
+  /:
+    get:
+      summary: Nothing
+      responses:
+        200:
+          description: Ok
 
 components:
   schemas:
@@ -86,6 +92,11 @@ components:
       type: object
       additionalProperties:
         $ref: '#/components/schemas/Course'
+        description: |
+          Sibling values alongside `$ref` is not allowed. But the
+          swagger-codegen throws an error if the following type field
+          is not set.
+        type: string
 
     ExtractedData2:
       description: |

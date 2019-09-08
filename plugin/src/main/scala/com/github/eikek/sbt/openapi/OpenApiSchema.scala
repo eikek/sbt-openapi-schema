@@ -2,6 +2,7 @@ package com.github.eikek.sbt.openapi
 
 import sbt._
 import sbt.Keys._
+import _root_.io.swagger.codegen.v3.cli.SwaggerCodegen
 import com.github.eikek.sbt.openapi.impl._
 
 object OpenApiSchema extends AutoPlugin {
@@ -25,6 +26,8 @@ object OpenApiSchema extends AutoPlugin {
     val openapiTargetLanguage = settingKey[Language]("The target language: either Language.Scala or Language.Java.")
     val openapiOutput = settingKey[File]("The directory where files are generated")
     val openapiCodegen = taskKey[Seq[File]]("Run the code generation")
+    val openapiStaticDoc = taskKey[File]("Generate a static HTML documentation")
+    val openapiStaticOut = settingKey[File]("The target directory for static documentation")
   }
 
   import autoImport._
@@ -50,6 +53,13 @@ object OpenApiSchema extends AutoPlugin {
       val pkg = openapiPackage.value
       val lang = openapiTargetLanguage.value
       generateCode(logger, out, lang, cfgJava, cfgScala, cfgElm, spec, pkg)
+    },
+    openapiStaticOut := (resourceManaged in Compile).value/"openapiDoc",
+    openapiStaticDoc := {
+      val logger = streams.value.log
+      val out = openapiStaticOut.value
+      val spec = openapiSpec.value
+      createOpenapiStaticDoc(logger, spec, out)
     }
   )
 
@@ -100,4 +110,29 @@ object OpenApiSchema extends AutoPlugin {
 
     files
   }
+
+  def createOpenapiStaticDoc(logger: Logger, openapi: File, out: File): File = {
+    val cl = Thread.currentThread.getContextClassLoader
+    val command = Array(
+      "generate",
+      "-i", openapi.toString,
+      "-l", "html2",
+      "-o", out.toString
+    )
+    logger.info(s"Creating static html rest documentation: ${command.toList}")
+    IO.createDirectory(out)
+    Thread.currentThread.setContextClassLoader(classOf[SwaggerCodegen].getClassLoader)
+    try {
+      SwaggerCodegen.main(command)
+    } finally {
+      Thread.currentThread.setContextClassLoader(cl)
+    }
+    val file = out/"index.html"
+    if (!file.exists) {
+      sys.error(s"Documentation generation failed. No file produced. '$file' doesn't exist.")
+    }
+    logger.info(s"Generated static file ${file}")
+    file
+  }
+
 }
