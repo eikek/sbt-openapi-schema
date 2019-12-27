@@ -5,7 +5,8 @@ import com.github.eikek.sbt.openapi._
 case class SchemaClass(name: String
   , properties: List[Property] = Nil
   , doc: Doc = Doc.empty
-  , wrapper: Boolean = false) {
+  , wrapper: Boolean = false
+  , discriminatorRef: Option[String] = None) {
 
   def +(p: Property): SchemaClass =
     copy(properties = p :: properties)

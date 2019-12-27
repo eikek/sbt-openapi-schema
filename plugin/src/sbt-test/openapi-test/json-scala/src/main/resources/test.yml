@@ -9,7 +9,15 @@ servers:
     description: Current host
 
 paths:
-
+  '/test':
+    get:
+      responses:
+        '200':
+          description: test
+          content:
+            applicaton/json:
+              schema:
+                $ref: "#/components/schemas/DiscriminatorObject"
 components:
   schemas:
     Room:
@@ -100,3 +108,46 @@ components:
       type: object
       additionalProperties:
         type: string
+
+    DiscriminatorObject:
+      type: object
+      discriminator:
+        propertyName: "type"
+      properties:
+        type:
+          type: string
+        sharedString:
+          type: string
+          description: |
+            Shared string value with all types of this object
+        anotherSharedBoolean:
+          type: boolean
+          description: |
+            A shared boolean value
+      required:
+        - type
+        - anotherSharedBoolean
+
+    FirstDiscriminatorSubObject:
+      allOf:
+        - $ref: '#/components/schemas/DiscriminatorObject'
+        - type: object
+          properties:
+            uniqueString:
+              type: string
+              description: |
+                String unique to this instance of discriminator
+
+    SecondDiscriminatorObject:
+      allOf:
+        - $ref: '#/components/schemas/DiscriminatorObject'
+        - type: object
+          properties:
+            uniqueInteger:
+              type: integer
+              description: |
+                String unique to this instance of discriminator
+            otherUniqueBoolean:
+              type: boolean
+          required:
+            - uniqueInteger
