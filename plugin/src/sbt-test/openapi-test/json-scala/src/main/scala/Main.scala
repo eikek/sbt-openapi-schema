@@ -1,7 +1,8 @@
 import org.myapi._
 import java.time.LocalDate
-import io.circe._, io.circe.generic.semiauto._, io.circe.parser._
+import io.circe._, io.circe.generic.extras.semiauto._, io.circe.parser._
 import io.circe.syntax._
+
 
 object Main {
 

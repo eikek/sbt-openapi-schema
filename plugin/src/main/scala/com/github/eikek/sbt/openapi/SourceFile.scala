@@ -11,6 +11,9 @@ case class SourceFile(name: String
   , wrapper: Boolean
   , internalSchemas: List[SourceFile]) {
 
+  def addFields(fs: List[Field]): SourceFile =
+    copy(fields = fields ++ fs)
+
   def addImports(is: Imports): SourceFile =
     copy(imports = imports ++ is)
 

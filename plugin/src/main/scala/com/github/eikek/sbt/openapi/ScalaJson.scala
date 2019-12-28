@@ -65,6 +65,6 @@ object ScalaJson {
     override def companion: PartConv[SourceFile] = cond(_.wrapper, wrapper, multiProps)
 
     override def resolve(src: SourceFile): SourceFile =
-      src.addImports(Imports("io.circe._", "import io.circe.generic.extras.semiauto._", "import io.circe.generic.extras.Configuration"))
+      src.addImports(Imports("io.circe._", "io.circe.generic.extras.semiauto._", "io.circe.generic.extras.Configuration"))
   }
 }

@@ -35,12 +35,12 @@ object Parser {
           innerSchema match {
             case s if s.getProperties != null =>
               val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
-              s.getProperties.asScala.map({case (n, ps) => makeProperty(n, ps, required, None)}).toList
+              Option(s.getProperties.asScala.map({case (n, ps) => makeProperty(n, ps, required, None)}).toList)
             case _ =>
-              List(makeProperty("value", innerSchema, Set("value"), None))
+              None
           }
         }
-        SingularSchemaClass(name, allProperties.toList, Doc(cs.getDescription.nullToEmpty), discriminatorRef = discriminatorOpt)
+        SingularSchemaClass(name, allProperties.toList.flatten, Doc(cs.getDescription.nullToEmpty), discriminatorRef = discriminatorOpt)
       case s if s.getProperties != null =>
         val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
         val discriminatorName = Option(s.getDiscriminator).map(_.getPropertyName)
@@ -48,7 +48,7 @@ object Parser {
         SingularSchemaClass(name, props, Doc(s.getDescription.nullToEmpty))
       case _ =>
         val discriminatorName = Option(schema.getDiscriminator).map(_.getPropertyName)
-        SingularSchemaClass(name, wrapper = true) + makeProperty("value", schema, Set("value"), discriminatorName)
+        SingularSchemaClass(name, wrapper = true) + makeProperty("value4", schema, Set("value5"), discriminatorName)
     }
 
   def makeProperty(name: String, schema: Schema[_], required: String => Boolean, discriminatorName: Option[String]): Property = {

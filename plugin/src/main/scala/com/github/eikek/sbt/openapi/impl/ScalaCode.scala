@@ -38,15 +38,26 @@ object ScalaCode {
         primitiveTypeMapping(t).map(cm.changeType)
   }
 
-  def enclosingObject(cfg: ScalaConfig): PartConv[SourceFile] = {
+  def enclosingObject(enclosingTraitName: String, cfg: ScalaConfig): PartConv[SourceFile] = {
     val parents: PartConv[List[Superclass]] =
       listSplit(
         constant[Superclass]("extends") ~ superclass,
         constant("with") ~ forListSep(superclass, Part(", "))
       )
 
+    val fieldPart: PartConv[Field] =
+      cond(
+        f => f.nullablePrimitive,
+        fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
+        fieldName + PartConv.of(": ") + fieldType
+      )
+
+    val internalCaseClass = constant("case class") ~ sourceName ~ forList(annotation, _ ++ _).contramap[SourceFile](_.ctorAnnot) ~ constant("(") ++
+      forListSep(fieldPart, Part(", ")).map(_.indent(2)).contramap(_.fields.filterNot(_.prop.discriminator)) ++
+      constant(s") extends $enclosingTraitName")
+
     val internalCaseClasses: PartConv[SourceFile] =
-      forList(caseClass, _ ++ _).contramap(_.internalSchemas)
+      forList(internalCaseClass, _ ++ _).contramap(_.internalSchemas)
 
     constant("object") ~ sourceName ~ forList(annotation, _ ++ _).contramap[SourceFile](_.ctorAnnot) ~ constant("{") ++
       constant("implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator(\"type\")").map(_.indent(2)) ++
@@ -59,8 +70,8 @@ object ScalaCode {
     val fieldPart: PartConv[Field] =
       cond(
         f => f.nullablePrimitive,
-        fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
-        fieldName + PartConv.of(": ") + fieldType
+        constant("val") ~ fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
+        constant("val") ~ fieldName + PartConv.of(": ") + fieldType
       )
     val parents: PartConv[List[Superclass]] =
       listSplit(
@@ -68,7 +79,7 @@ object ScalaCode {
         constant("with") ~ forListSep(superclass, Part(", "))
       )
     constant("sealed trait") ~ sourceName ~ forList(annotation, _ ++ _).contramap[SourceFile](_.ctorAnnot) ~ constant("{") ++
-      forListSep(fieldPart, Part(", ")).map(_.indent(2)).contramap(_.fields.filterNot(_.prop.discriminator)) ++
+      forListSep(fieldPart, Part("; ")).map(_.indent(2)).contramap(_.fields.filterNot(_.prop.discriminator)) ++
       constant("}") ~ parents.map(_.newline).contramap(_.parents)
   }
 
@@ -102,7 +113,7 @@ object ScalaCode {
         (src.name, conv.toPart(src).render)
       case dsc: DiscriminantSchemaClass =>
         val src = resolveSchema(sc, cfg.mapping).copy(pkg = pkg).modify(cfg.json.resolve)
-        val conv = fileHeader ++ sealedTrait ++ enclosingObject(cfg)
+        val conv = fileHeader ++ sealedTrait ++ enclosingObject(src.name, cfg)
         (src.name, conv.toPart(src).render)
     }
   }

@@ -30,11 +30,13 @@ case class DiscriminantSchemaClass(name: String
 object SchemaClass {
 
   def resolve(sc: SchemaClass, pkg: Pkg, tm: TypeMapping, cm: CustomMapping): SourceFile = {
+    val topLevelFields = sc.properties.map(p => Field(p, Nil, tm(p.`type`).getOrElse(sys.error(s"No type for: $p"))))
+
     val internalSchemas = sc match {
       case dsc: DiscriminantSchemaClass =>
         dsc.subSchemas
           .map(ss => resolve(ss, pkg, tm, cm))
-          .map(_.addParents(Superclass(sc.name, Imports.empty, true)))
+          .map(ss => ss.addFields(topLevelFields))
       case _ => List.empty
     }
 
@@ -44,7 +46,7 @@ object SchemaClass {
       , annot = Nil
       , ctorAnnot = Nil
       , doc = sc.doc
-      , fields = sc.properties.map(p => Field(p, Nil, tm(p.`type`).getOrElse(sys.error(s"No type for: $p"))))
+      , fields = topLevelFields
       , wrapper = sc.wrapper
       , internalSchemas = internalSchemas).
       modify(cm.changeSource).
