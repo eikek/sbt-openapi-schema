@@ -10,7 +10,7 @@ import com.github.eikek.sbt.openapi._
 object Parser {
   private val parser = new OpenAPIV3Parser()
 
-  def parse(file: String): Map[String, SchemaClass] = {
+  def parse(file: String): Map[String, SingularSchemaClass] = {
     // see http://javadoc.io/doc/io.swagger.core.v3/swagger-models/2.0.7
     // http://javadoc.io/doc/io.swagger.parser.v3/swagger-parser-v3/2.0.9
     val oapi = parser.read(file)
@@ -21,7 +21,7 @@ object Parser {
       })
   }
 
-  def makeSchemaClass(name: String, schema: Schema[_]): SchemaClass =
+  def makeSchemaClass(name: String, schema: Schema[_]): SingularSchemaClass =
     schema match {
       case cs: ComposedSchema =>
         val allOfSchemas = cs.getAllOf.asScala
@@ -40,15 +40,15 @@ object Parser {
               List(makeProperty("value", innerSchema, Set("value"), None))
           }
         }
-        SchemaClass(name, allProperties.toList, Doc(cs.getDescription.nullToEmpty), discriminatorRef = discriminatorOpt)
+        SingularSchemaClass(name, allProperties.toList, Doc(cs.getDescription.nullToEmpty), discriminatorRef = discriminatorOpt)
       case s if s.getProperties != null =>
         val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
         val discriminatorName = Option(s.getDiscriminator).map(_.getPropertyName)
         val props = s.getProperties.asScala.map({case (n, ps) => makeProperty(n, ps, required, discriminatorName)}).toList
-        SchemaClass(name, props, Doc(s.getDescription.nullToEmpty))
+        SingularSchemaClass(name, props, Doc(s.getDescription.nullToEmpty))
       case _ =>
         val discriminatorName = Option(schema.getDiscriminator).map(_.getPropertyName)
-        SchemaClass(name, wrapper = true) + makeProperty("value", schema, Set("value"), discriminatorName)
+        SingularSchemaClass(name, wrapper = true) + makeProperty("value", schema, Set("value"), discriminatorName)
     }
 
   def makeProperty(name: String, schema: Schema[_], required: String => Boolean, discriminatorName: Option[String]): Property = {

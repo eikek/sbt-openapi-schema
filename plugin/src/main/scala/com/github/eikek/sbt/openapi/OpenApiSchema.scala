@@ -1,9 +1,9 @@
 package com.github.eikek.sbt.openapi
 
-import sbt._
-import sbt.Keys._
 import _root_.io.swagger.codegen.v3.cli.SwaggerCodegen
 import com.github.eikek.sbt.openapi.impl._
+import sbt.Keys._
+import sbt._
 
 object OpenApiSchema extends AutoPlugin {
 
@@ -85,14 +85,31 @@ object OpenApiSchema extends AutoPlugin {
     , pkg: Pkg): Seq[File] = {
 
     val targetPath = pkg.name.split('.').foldLeft(out)(_ / _)
-    val schemas = Parser.parse(spec.toString).values.toList
+    val allSchemas = Parser.parse(spec.toString).values.toList
 
     IO.createDirectories(Seq(targetPath))
-    val files = schemas.map { sc =>
+
+    // Group the discriminant schemas together
+    val discriminantSchemasMap = allSchemas.filter(_.discriminatorRef.isDefined).groupBy(_.discriminatorRef.get)
+    val discriminantSchemas = discriminantSchemasMap.map { case (k, v) =>
+      val topLevelDiscriminant = allSchemas.collectFirst { case ssc if ssc.name == k => ssc }.get
+        DiscriminantSchemaClass(
+          topLevelDiscriminant.name,
+          topLevelDiscriminant.properties,
+          topLevelDiscriminant.doc,
+          topLevelDiscriminant.wrapper,
+          v
+        )
+    }
+    val singularSchemas = allSchemas
+      .filterNot(ssc => discriminantSchemasMap.contains(ssc.name))
+      .filterNot(ssc => discriminantSchemas.map(_.name).toSet.contains(ssc.name))
+
+    val singularFiles = singularSchemas.map { ssc =>
       val (name, code) = lang match {
-        case Language.Scala => ScalaCode.generate(sc, pkg, cfgScala)
-        case Language.Java => JavaCode.generate(sc, pkg, cfgJava)
-        case Language.Elm => ElmCode.generate(sc, pkg, cfgElm)
+        case Language.Scala => ScalaCode.generate(ssc, pkg, cfgScala)
+        case Language.Java => JavaCode.generate(ssc, pkg, cfgJava)
+        case Language.Elm => ElmCode.generate(ssc, pkg, cfgElm)
       }
       val file = targetPath / (name + "." + lang.extension)
       if (!file.exists || IO.read(file) != code) {
@@ -101,14 +118,27 @@ object OpenApiSchema extends AutoPlugin {
       }
       file
     }
+    val discriminantFiles = discriminantSchemas.map { dsc =>
+      val (name, code) = lang match {
+        case Language.Scala => ScalaCode.generate(dsc, pkg, cfgScala)
+        case _ => sys.error(s"Java and Elm not yet supported for discriminants")
+      }
+      val file = targetPath / (name + "." + lang.extension)
+      if (!file.exists || IO.read(file) != code) {
+        logger.info(s"Writing file $file")
+        IO.write(file, code)
+      }
+      file
+    }
+    val allFiles = singularFiles ++ discriminantFiles
     IO.listFiles(targetPath).
-      filter(f => !files.contains(f)).
+      filter(f => !allFiles.contains(f)).
       foreach { f =>
         logger.info(s"Deleting unused file $f")
         IO.delete(f)
       }
 
-    files
+    allFiles
   }
 
   def createOpenapiStaticDoc(logger: Logger, openapi: File, out: File): File = {

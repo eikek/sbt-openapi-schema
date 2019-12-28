@@ -52,7 +52,7 @@ object ElmCode {
           v <- defaultTypeMapping(cm, pkg)(value)
         } yield cm.changeType(TypeDef(s"(Dict ${k.name},${v.name})", k.imports ++ v.imports ++ Imports("Dict")))
       case Type.Ref(name) =>
-        val srcRef = SchemaClass(name)
+        val srcRef = SingularSchemaClass(name)
         val refName = resolveSchema(srcRef, cm, pkg).name
         Some(TypeDef(refName, Imports(s"${pkg.name}.$refName exposing ($refName)")))
       case t =>

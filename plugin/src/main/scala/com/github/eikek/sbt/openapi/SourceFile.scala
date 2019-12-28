@@ -8,7 +8,8 @@ case class SourceFile(name: String
   , doc: Doc
   , fields: List[Field]
   , parents: List[Superclass] = Nil
-  , wrapper: Boolean) {
+  , wrapper: Boolean
+  , internalSchemas: List[SourceFile]) {
 
   def addImports(is: Imports): SourceFile =
     copy(imports = imports ++ is)

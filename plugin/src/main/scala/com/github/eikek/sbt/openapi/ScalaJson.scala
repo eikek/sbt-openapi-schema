@@ -39,4 +39,32 @@ object ScalaJson {
     def resolve(src: SourceFile): SourceFile =
       src.addImports(Imports("io.circe._", "io.circe.generic.semiauto._"))
   }
+
+  val circeSemiautoExtra = new ScalaJson {
+
+    val props: PartConv[SourceFile] =
+      constant("object") ~ sourceName ~ constant("{") ++
+        constant("implicit val jsonDecoder: Decoder[").map(_.indent(2)) + sourceName + constant("] = deriveDecoder[") + sourceName + constant("]") ++
+        constant("implicit val jsonEncoder: Encoder[").map(_.indent(2)) + sourceName + constant("] = deriveEncoder[") + sourceName + constant("]") ++
+        constant("}")
+
+    val multiProps: PartConv[SourceFile] = {
+      forList(props, _ ++ _).contramap[SourceFile](_.internalSchemas)
+    }
+
+    val wrapper: PartConv[SourceFile] =
+      constant("object") ~ sourceName ~ constant("{") ++
+        constant("implicit def jsonDecoder(implicit vd: Decoder[").map(_.indent(2)) +
+        fieldType.contramap[SourceFile](_.fields.head) + constant("]): Decoder[") + sourceName + constant("] =") ++
+        constant("vd.map(").map(_.indent(4)) + sourceName + constant(".apply)") ++
+        constant("implicit def jsonEncoder(implicit ve: Encoder[").map(_.indent(2)) +
+        fieldType.contramap[SourceFile](_.fields.head) + constant("]): Encoder[") + sourceName + constant("] =") ++
+        constant("ve.contramap(_.value)").map(_.indent(4)) ++
+        constant("}")
+
+    override def companion: PartConv[SourceFile] = cond(_.wrapper, wrapper, multiProps)
+
+    override def resolve(src: SourceFile): SourceFile =
+      src.addImports(Imports("io.circe._", "import io.circe.generic.extras.semiauto._", "import io.circe.generic.extras.Configuration"))
+  }
 }

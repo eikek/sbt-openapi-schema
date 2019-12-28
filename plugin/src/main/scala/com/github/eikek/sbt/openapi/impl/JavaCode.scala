@@ -42,7 +42,7 @@ object JavaCode {
         v <- defaultTypeMapping(cm)(value)
       } yield cm.changeType(TypeDef(s"Map<${boxed(k).name},${boxed(v).name}>", k.imports ++ v.imports ++ Imports("java.util.Map")))
     case Type.Ref(name) =>
-      val schema = SchemaClass(name)
+      val schema = SingularSchemaClass(name)
       Some(TypeDef(resolveSchema(schema, cm).name, Imports.empty))
     case t =>
         primitiveTypeMapping(t).map(cm.changeType)
