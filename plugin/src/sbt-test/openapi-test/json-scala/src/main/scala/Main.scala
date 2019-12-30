@@ -3,7 +3,6 @@ import java.time.LocalDate
 import io.circe._, io.circe.generic.extras.semiauto._, io.circe.parser._
 import io.circe.syntax._
 
-
 object Main {
 
   def main(args: Array[String]): Unit = {
@@ -12,6 +11,10 @@ object Main {
     testJson(CourseDto("course10", LocalDate.now, RoomDto("heat room", Some(12)), List(PersonDto(Some("hugo"), "meyer", None))))
     testJson(ExtractedData1Dto(Map("c1" -> CourseDto("course10", LocalDate.now, RoomDto("heat room", Some(12)), List(PersonDto(Some("hugo"), "meyer", None))))))
     testJson(ExtractedData2Dto(Map("c1" -> "v1", "c2" -> "v2")))
+    val firstDiscriminator: DiscriminatorObjectDto = DiscriminatorObjectDto.FirstDiscriminatorSubObjectDto(uniqueString = Some("v1"), sharedString = Some("v2"), anotherSharedBoolean = true)
+    val secondDiscriminator: DiscriminatorObjectDto = DiscriminatorObjectDto.SecondDiscriminatorObjectDto(uniqueInteger = 2, otherUniqueBoolean = None, sharedString = Some("v4"), anotherSharedBoolean = true)
+    testJson(firstDiscriminator)
+    testJson(secondDiscriminator)
   }
 
   def testJson[A](a: A)(implicit d: Decoder[A], e: Encoder[A]): Unit = {

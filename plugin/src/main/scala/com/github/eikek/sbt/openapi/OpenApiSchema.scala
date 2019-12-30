@@ -139,7 +139,7 @@ object OpenApiSchema extends AutoPlugin {
         v.toList
       )
     }.toSeq
-
+git stat
     val singularSchemas: Seq[SingularSchemaClass] = allSchemas
       .filterNot(ssc => discriminantSchemasMap.contains(ssc.name))
       .filterNot(ssc => discriminantSchemasMap.values.toList.flatten.map(_.name).contains(ssc.name))
