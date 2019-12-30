@@ -48,7 +48,7 @@ object Parser {
         SingularSchemaClass(name, props, Doc(s.getDescription.nullToEmpty))
       case _ =>
         val discriminatorName = Option(schema.getDiscriminator).map(_.getPropertyName)
-        SingularSchemaClass(name, wrapper = true) + makeProperty("value4", schema, Set("value5"), discriminatorName)
+        SingularSchemaClass(name, wrapper = true) + makeProperty("value", schema, Set("value"), discriminatorName)
     }
 
   def makeProperty(name: String, schema: Schema[_], required: String => Boolean, discriminatorName: Option[String]): Property = {

@@ -2,6 +2,7 @@ package org.app
 
 import java.time.LocalDate
 import io.circe._
+import io.circe.generic.extras.semiauto._
 
 trait Codecs {
 

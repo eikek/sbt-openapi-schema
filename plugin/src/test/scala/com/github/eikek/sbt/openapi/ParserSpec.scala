@@ -31,7 +31,6 @@ object ParserSpec extends SimpleTestSuite {
     assertEquals(actual.discriminatorRef, Some("DiscriminatorObject"))
     val propsWithNoDocs: Set[Property] = actual.properties.map(_.copy(doc = Doc.empty)).toSet
     assertEquals(propsWithNoDocs, Set(
-      Property("value", Type.Ref("DiscriminatorObject"), false, None, None, Doc.empty, false),
       Property("uniqueString", Type.String, true, None, None, Doc.empty, false)
     ))
   }
