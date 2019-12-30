@@ -5,14 +5,6 @@ import minitest.SimpleTestSuite
 
 object ScalaCodeSpec extends SimpleTestSuite {
 
-//  test("Simple schema") {
-//    val schemaClass = SingularSchemaClass("Person", properties = List(Property("firstName", Type.String, false, None, None)), doc = Doc.empty, wrapper = false, None)
-//
-//    val result = ScalaCode.generate(schemaClass, Pkg("com.test"), ScalaConfig().withJson(ScalaJson.circeSemiauto))
-//
-//    println(result._2)
-//  }
-
   test("Discriminant Schema") {
     val schemaClass = DiscriminantSchemaClass("Stuff",
       properties = List(
@@ -29,8 +21,4 @@ object ScalaCodeSpec extends SimpleTestSuite {
 
     println(result._2)
   }
-
-//  test("next") {
-//    assertEquals(2, 1)
-//  }
 }
