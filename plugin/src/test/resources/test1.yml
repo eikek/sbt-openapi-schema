@@ -121,13 +121,13 @@ components:
 
     FirstDiscriminatorSubObject:
       allOf:
-        - $ref: '#/components/schemas/DiscriminatorObject'
         - type: object
           properties:
             uniqueString:
               type: string
               description: |
                 String unique to this instance of discriminator
+        - $ref: '#/components/schemas/DiscriminatorObject'
 
     SecondDiscriminatorObject:
       allOf:

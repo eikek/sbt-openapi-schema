@@ -35,6 +35,21 @@ object ParserSpec extends SimpleTestSuite {
     ))
   }
 
+  test("Parsing out properties from composed schema with discriminator (different order)") {
+    val test1 = getClass.getResource("/test1.yml")
+    val schema = Parser.parse(test1.toString)
+
+    val actual = schema("SecondDiscriminatorObject")
+
+    assertEquals(actual.name,"SecondDiscriminatorObject")
+    assertEquals(actual.discriminatorRef, Some("DiscriminatorObject"))
+    val propsWithNoDocs: Set[Property] = actual.properties.map(_.copy(doc = Doc.empty)).toSet
+    assertEquals(propsWithNoDocs, Set(
+      Property("uniqueInteger", Type.Int32, false, None, None, Doc.empty, false),
+      Property("otherUniqueBoolean", Type.Bool, true)
+    ))
+  }
+
   test("Parsing out properties from flat schema") {
     val test1 = getClass.getResource("/test1.yml")
     val schema = Parser.parse(test1.toString)

@@ -25,8 +25,7 @@ object Parser {
     schema match {
       case cs: ComposedSchema =>
         val allOfSchemas = cs.getAllOf.asScala
-        // Check for explicit discriminator or else check for first reference to another schema
-        // (this implies that discriminator ref must come first in allOf)
+
         val discriminatorOpt = allOfSchemas.collectFirst {
           case s: Schema[_] if s.getDiscriminator != null => s.getName
         } orElse allOfSchemas.collectFirst { case s: Schema[_] if s.get$ref() != null => s.get$ref().split('/').last }
