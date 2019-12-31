@@ -35,7 +35,7 @@ object SchemaClass {
     val internalSchemas = sc match {
       case dsc: DiscriminantSchemaClass =>
         dsc.subSchemas
-          .map(ss => resolve(ss, pkg, tm, cm))
+          .map(ss => resolve(ss, pkg, tm, CustomMapping.none))
           .map(ss => ss.addFields(topLevelFields))
       case _ => List.empty
     }
