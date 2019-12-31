@@ -37,6 +37,7 @@ object SchemaClass {
         dsc.subSchemas
           .map(ss => resolve(ss, pkg, tm, CustomMapping.none))
           .map(ss => ss.addFields(topLevelFields))
+          .map(ss => ss.modify(_.copy(isInternal = true)))
       case _ => List.empty
     }
 

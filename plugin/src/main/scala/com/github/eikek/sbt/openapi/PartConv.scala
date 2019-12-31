@@ -85,7 +85,10 @@ object PartConv {
     string.contramap(_.typeDef.name)
 
   val discriminantType: PartConv[SourceFile] =
-    string.contramap(sc => sc.fields.collectFirst { case f if f.prop.discriminator => f.prop.name}.getOrElse("type") )
+    string.contramap(_.fields.collectFirst { case f if f.prop.discriminator => f.prop.name}.getOrElse("type") )
+
+  val accessModifier: PartConv[SourceFile] =
+    cond(_.isInternal, constant("private "), empty)
 
   def cond[A](p: A => Boolean, when: PartConv[A], otherwise: PartConv[A]): PartConv[A] =
     PartConv(a  => if (p(a)) when.toPart(a) else otherwise.toPart(a))
