@@ -87,14 +87,15 @@ object OpenApiSchema extends AutoPlugin {
     val targetPath = pkg.name.split('.').foldLeft(out)(_ / _)
     IO.createDirectories(Seq(targetPath))
 
-    val allSchemas: Seq[SingularSchemaClass] = Parser.parse(spec.toString).values.toList
-    val (singularSchemas, discriminantSchemas) = separateSchemas(allSchemas)
+    val schemas: Seq[SingularSchemaClass] = Parser.parse(spec.toString).values.toList
+    val groupedSchemas = groupDiscriminantSchemas(schemas)
 
-    val singularFiles = singularSchemas.map { ssc =>
-      val (name, code) = lang match {
-        case Language.Scala => ScalaCode.generate(ssc, pkg, cfgScala)
-        case Language.Java => JavaCode.generate(ssc, pkg, cfgJava)
-        case Language.Elm => ElmCode.generate(ssc, pkg, cfgElm)
+    val files = groupedSchemas.map { sc =>
+      val (name, code) = (lang, sc) match {
+        case (Language.Scala, _) => ScalaCode.generate(sc, pkg, cfgScala)
+        case (Language.Java, _: SingularSchemaClass) => JavaCode.generate(sc, pkg, cfgJava)
+        case (Language.Elm, _: SingularSchemaClass) => ElmCode.generate(sc, pkg, cfgElm)
+        case _ => sys.error(s"Java and Elm not yet supported for discriminants")
       }
       val file = targetPath / (name + "." + lang.extension)
       if (!file.exists || IO.read(file) != code) {
@@ -103,31 +104,18 @@ object OpenApiSchema extends AutoPlugin {
       }
       file
     }
-    val discriminantFiles = discriminantSchemas.map { dsc =>
-      val (name, code) = lang match {
-        case Language.Scala => ScalaCode.generate(dsc, pkg, cfgScala)
-        case _ => sys.error(s"Java and Elm not yet supported for discriminants")
-      }
-      val file = targetPath / (name + "." + lang.extension)
-      if (!file.exists || IO.read(file) != code) {
-        logger.info(s"Writing discriminant file $file")
-        IO.write(file, code)
-      }
-      file
-    }
-    val allFiles = singularFiles ++ discriminantFiles
+
     IO.listFiles(targetPath).
-      filter(f => !allFiles.contains(f)).
+      filter(f => !files.contains(f)).
       foreach { f =>
         logger.info(s"Deleting unused file $f")
         IO.delete(f)
       }
 
-    allFiles
+    files
   }
 
-  def separateSchemas(allSchemas: Seq[SingularSchemaClass]): (Seq[SingularSchemaClass], Seq[DiscriminantSchemaClass]) = {
-    // Group the discriminant schemas together
+  def groupDiscriminantSchemas(allSchemas: Seq[SingularSchemaClass]): Seq[SchemaClass] = {
     val discriminantSchemasMap = allSchemas.filter(_.discriminatorRef.isDefined).groupBy(_.discriminatorRef.get)
     val discriminantSchemas = discriminantSchemasMap.map { case (k, v) =>
       val topLevelDiscriminant = allSchemas.collectFirst { case ssc if ssc.name == k => ssc }.get
@@ -144,7 +132,7 @@ object OpenApiSchema extends AutoPlugin {
       .filterNot(ssc => discriminantSchemasMap.contains(ssc.name))
       .filterNot(ssc => discriminantSchemasMap.values.toList.flatten.map(_.name).contains(ssc.name))
 
-    (singularSchemas, discriminantSchemas)
+    singularSchemas ++ discriminantSchemas
   }
 
   def createOpenapiStaticDoc(logger: Logger, openapi: File, out: File): File = {
