@@ -15,6 +15,10 @@ object Main {
     val secondDiscriminator: DiscriminatorObjectDto = DiscriminatorObjectDto.SecondDiscriminatorObjectDto(uniqueInteger = 2, otherUniqueBoolean = None, sharedString = Some("v4"), anotherSharedBoolean = true)
     testJson(firstDiscriminator)
     testJson(secondDiscriminator)
+    val catDiscriminator: PetDto = PetDto.CatDto("claw", "Sprinkles")
+    val dogDiscriminator: PetDto = PetDto.DogDto(10, "Fido")
+    testJson(catDiscriminator)
+    testJson(dogDiscriminator)
   }
 
   def testJson[A](a: A)(implicit d: Decoder[A], e: Encoder[A]): Unit = {

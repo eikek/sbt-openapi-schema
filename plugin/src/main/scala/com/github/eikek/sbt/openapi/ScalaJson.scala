@@ -48,14 +48,14 @@ object ScalaJson {
 
     def props(makePrivate: Boolean): PartConv[SourceFile] =
       constant("object") ~ sourceName ~ constant("{") ++
-        constant("implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator(\"type\")").map(_.indent(2)) ++
+        constant("implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator(\"").map(_.indent(2)) + discriminantType + constant("\")") ++
         constant(s"${if (makePrivate) "private " else ""}implicit val jsonDecoder: Decoder[").map(_.indent(2)) + sourceName + constant("] = deriveDecoder[") + sourceName + constant("]") ++
         constant(s"${if (makePrivate) "private " else ""}implicit val jsonEncoder: Encoder[").map(_.indent(2)) + sourceName + constant("] = deriveEncoder[") + sourceName + constant("]") ++
         constant("}")
 
     def wrapper(makePrivate: Boolean): PartConv[SourceFile] =
       constant("object") ~ sourceName ~ constant("{") ++
-        constant("implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator(\"type\")").map(_.indent(2)) ++
+        constant("implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator(\"").map(_.indent(2)) + discriminantType + constant("\")") ++
         constant(s"${if (makePrivate) "private " else ""}implicit def jsonDecoder(implicit vd: Decoder[").map(_.indent(2)) +
         fieldType.contramap[SourceFile](_.fields.head) + constant("]): Decoder[") + sourceName + constant("] =") ++
         constant("vd.map(").map(_.indent(4)) + sourceName + constant(".apply)") ++
