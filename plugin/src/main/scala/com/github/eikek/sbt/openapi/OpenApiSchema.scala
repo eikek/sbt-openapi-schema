@@ -1,9 +1,9 @@
 package com.github.eikek.sbt.openapi
 
-import sbt._
-import sbt.Keys._
 import _root_.io.swagger.codegen.v3.cli.SwaggerCodegen
 import com.github.eikek.sbt.openapi.impl._
+import sbt.Keys._
+import sbt._
 
 object OpenApiSchema extends AutoPlugin {
 
@@ -85,14 +85,17 @@ object OpenApiSchema extends AutoPlugin {
     , pkg: Pkg): Seq[File] = {
 
     val targetPath = pkg.name.split('.').foldLeft(out)(_ / _)
-    val schemas = Parser.parse(spec.toString).values.toList
-
     IO.createDirectories(Seq(targetPath))
-    val files = schemas.map { sc =>
-      val (name, code) = lang match {
-        case Language.Scala => ScalaCode.generate(sc, pkg, cfgScala)
-        case Language.Java => JavaCode.generate(sc, pkg, cfgJava)
-        case Language.Elm => ElmCode.generate(sc, pkg, cfgElm)
+
+    val schemas: Seq[SingularSchemaClass] = Parser.parse(spec.toString).values.toList
+    val groupedSchemas = groupDiscriminantSchemas(schemas)
+
+    val files = groupedSchemas.map { sc =>
+      val (name, code) = (lang, sc) match {
+        case (Language.Scala, _) => ScalaCode.generate(sc, pkg, cfgScala)
+        case (Language.Java, _: SingularSchemaClass) => JavaCode.generate(sc, pkg, cfgJava)
+        case (Language.Elm, _: SingularSchemaClass) => ElmCode.generate(sc, pkg, cfgElm)
+        case _ => sys.error(s"Java and Elm not yet supported for discriminants")
       }
       val file = targetPath / (name + "." + lang.extension)
       if (!file.exists || IO.read(file) != code) {
@@ -101,6 +104,7 @@ object OpenApiSchema extends AutoPlugin {
       }
       file
     }
+
     IO.listFiles(targetPath).
       filter(f => !files.contains(f)).
       foreach { f =>
@@ -109,6 +113,26 @@ object OpenApiSchema extends AutoPlugin {
       }
 
     files
+  }
+
+  def groupDiscriminantSchemas(allSchemas: Seq[SingularSchemaClass]): Seq[SchemaClass] = {
+    val discriminantSchemasMap = allSchemas.filter(_.discriminatorRef.isDefined).groupBy(_.discriminatorRef.get)
+    val discriminantSchemas = discriminantSchemasMap.map { case (k, v) =>
+      val topLevelDiscriminant = allSchemas.collectFirst { case ssc if ssc.name == k => ssc }.get
+      DiscriminantSchemaClass(
+        topLevelDiscriminant.name,
+        topLevelDiscriminant.properties,
+        topLevelDiscriminant.doc,
+        topLevelDiscriminant.wrapper,
+        v.toList
+      )
+    }.toSeq
+
+    val singularSchemas: Seq[SingularSchemaClass] = allSchemas
+      .filterNot(ssc => discriminantSchemasMap.contains(ssc.name))
+      .filterNot(ssc => discriminantSchemasMap.values.toList.flatten.map(_.name).contains(ssc.name))
+
+    singularSchemas ++ discriminantSchemas
   }
 
   def createOpenapiStaticDoc(logger: Logger, openapi: File, out: File): File = {

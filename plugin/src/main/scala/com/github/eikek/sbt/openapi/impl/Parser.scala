@@ -10,7 +10,7 @@ import com.github.eikek.sbt.openapi._
 object Parser {
   private val parser = new OpenAPIV3Parser()
 
-  def parse(file: String): Map[String, SchemaClass] = {
+  def parse(file: String): Map[String, SingularSchemaClass] = {
     // see http://javadoc.io/doc/io.swagger.core.v3/swagger-models/2.0.7
     // http://javadoc.io/doc/io.swagger.parser.v3/swagger-parser-v3/2.0.9
     val oapi = parser.read(file)
@@ -21,27 +21,46 @@ object Parser {
       })
   }
 
-  def makeSchemaClass(name: String, schema: Schema[_]): SchemaClass =
+  def makeSchemaClass(name: String, schema: Schema[_]): SingularSchemaClass =
     schema match {
+      case cs: ComposedSchema =>
+        val allOfSchemas = cs.getAllOf.asScala
+
+        val discriminatorOpt = allOfSchemas.collectFirst {
+          case s: Schema[_] if s.getDiscriminator != null => s.getName
+        } orElse allOfSchemas.collectFirst { case s: Schema[_] if s.get$ref() != null => s.get$ref().split('/').last }
+
+        val allProperties = allOfSchemas.flatMap { innerSchema =>
+          innerSchema match {
+            case s if s.getProperties != null =>
+              val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
+              Option(s.getProperties.asScala.map({case (n, ps) => makeProperty(n, ps, required, None)}).toList)
+            case _ =>
+              None
+          }
+        }
+        SingularSchemaClass(name, allProperties.toList.flatten, Doc(cs.getDescription.nullToEmpty), discriminatorRef = discriminatorOpt)
       case s if s.getProperties != null =>
         val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
-        val props = s.getProperties.asScala.map({case (n, ps) => makeProperty(n, ps, required)}).toList
-        SchemaClass(name, props, Doc(s.getDescription.nullToEmpty))
-
+        val discriminatorName = Option(s.getDiscriminator).map(_.getPropertyName)
+        val props = s.getProperties.asScala.map({case (n, ps) => makeProperty(n, ps, required, discriminatorName)}).toList
+        SingularSchemaClass(name, props, Doc(s.getDescription.nullToEmpty))
       case _ =>
-        SchemaClass(name, wrapper = true) + makeProperty("value", schema, Set("value"))
+        val discriminatorName = Option(schema.getDiscriminator).map(_.getPropertyName)
+        SingularSchemaClass(name, wrapper = true) + makeProperty("value", schema, Set("value"), discriminatorName)
     }
 
-  def makeProperty(name: String, schema: Schema[_], required: String => Boolean): Property = {
+  def makeProperty(name: String, schema: Schema[_], required: String => Boolean, discriminatorName: Option[String]): Property = {
     val p = Property(name, schemaType(schema)
       , format = schema.getFormat.asNonEmpty
       , pattern = schema.getPattern.asNonEmpty
       , nullable = schema.getNullable == true || !required(name)
-      , doc = Doc(schema.getDescription.nullToEmpty))
+      , doc = Doc(schema.getDescription.nullToEmpty)
+      , discriminator = discriminatorName.contains(name))
     p
   }
 
-  //TODO missing: BinarySchema, ByteArraySchema, ComposedSchema, FileSchema, MapSchema
+  //TODO missing: BinarySchema, ByteArraySchema, FileSchema, MapSchema
   def schemaType(sch: Schema[_]): Type =
     sch match {
       case s: ArraySchema =>

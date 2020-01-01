@@ -1,0 +1,6 @@
+# run the task
+> openapiCodegen
+$ exists target/scala-2.12/src_managed/main/org/myapi/RoomDto.scala
+# the code should compile
+> compile
+> run
