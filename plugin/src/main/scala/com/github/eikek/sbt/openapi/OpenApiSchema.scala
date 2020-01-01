@@ -4,6 +4,7 @@ import _root_.io.swagger.codegen.v3.cli.SwaggerCodegen
 import com.github.eikek.sbt.openapi.impl._
 import sbt.Keys._
 import sbt._
+import scala.concurrent.duration._
 
 object OpenApiSchema extends AutoPlugin {
 
@@ -145,13 +146,20 @@ object OpenApiSchema extends AutoPlugin {
     )
     logger.info(s"Creating static html rest documentation: ${command.toList}")
     IO.createDirectory(out)
+    val file = out/"index.html"
     Thread.currentThread.setContextClassLoader(classOf[SwaggerCodegen].getClassLoader)
     try {
       SwaggerCodegen.main(command)
+      // the above command starts a new thread that does the work so
+      // the call returns immediately, but the file is still being
+      // generated
+      val sw = Stopwatch.start
+      while (!file.exists && sw.isBelow(20.seconds)) {
+        Thread.sleep(100)
+      }
     } finally {
       Thread.currentThread.setContextClassLoader(cl)
     }
-    val file = out/"index.html"
     if (!file.exists) {
       sys.error(s"Documentation generation failed. No file produced. '$file' doesn't exist.")
     }
@@ -159,4 +167,11 @@ object OpenApiSchema extends AutoPlugin {
     file
   }
 
+  final case class Stopwatch(start: Long) {
+    def isBelow(fd: FiniteDuration): Boolean =
+      Duration.fromNanos(System.nanoTime - start) < fd
+  }
+  object Stopwatch {
+    def start: Stopwatch = Stopwatch(System.nanoTime)
+  }
 }
