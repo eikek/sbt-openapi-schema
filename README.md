@@ -1,5 +1,8 @@
 # SBT OpenApi Schema Codegen
 
+[![Build Status](https://img.shields.io/travis/eikek/sbt-openapi-schema/master.svg)](https://travis-ci.org/eikek/sbt-openapi-schema)
+
+
 This is an sbt plugin to generate Scala, Java or Elm code given an
 openapi 3.x specification. Unlike other codegen tools, this focuses
 only on the `#/components/schema` section. Also, it generates
@@ -15,8 +18,7 @@ immutable classes and optionally the corresponding JSON conversions.
   module for decoding.
 - JSON support is optional.
 
-The scala/java variants are implemented in different plugins. The
-implementation is based on the
+The implementation is based on the
 [swagger-parser](https://github.com/swagger-api/swagger-parser)
 project.
 
@@ -27,9 +29,10 @@ It is possible to customize the code generation.
 Add this plugin to your build in `project/plugins.sbt`:
 
 ```
-addSbtPlugin("com.github.eikek" % "sbt-openapi-schema" % "0.4.0")
+addSbtPlugin("com.github.eikek" % "sbt-openapi-schema" % "0.5.0")
 ```
 
+Please check the git tags or maven central for the current version.
 Then enable the plugin in some project:
 
 ```
@@ -40,7 +43,7 @@ There are two required settings: `openapiSpec` and
 `openapiTargetLanguage`. The first defines the openapi.yml file and
 the other is a constant from the `Language` object:
 
-```
+```scala
 import com.github.eikek.sbt.openapi._
 
 project.
@@ -64,7 +67,7 @@ The key `openapiJavaConfig` and `openapiScalaConfig` define some
 configuration to customize the code generation.
 
 For Java, it looks like this:
-```
+```scala
 case class JavaConfig(mapping: CustomMapping = CustomMapping.none
   , json: JavaJson = JavaJson.none
   , builderParents: List[Superclass] = Nil) {
@@ -99,7 +102,7 @@ different types (for example, you might want to change `LocalDate` to
 `Date`).
 
 It looks like this:
-```
+```scala
 trait CustomMapping { self =>
 
   def changeType(td: TypeDef): TypeDef
@@ -121,7 +124,7 @@ There are convenient constructors in its companion object.
 It allows to use different types via `changeType` or change the source
 file. Here is a `build.sbt` example snippet:
 
-```
+```scala
 import com.github.eikek.sbt.openapi._
 
 libraryDependencies ++= Seq(
@@ -160,7 +163,7 @@ default output path for elm sources is `target/elm-src`. So in your
 `elm.json` file, add this directory to the `source-directories` list
 along with the main source dir. It may look something like this:
 
-```
+```json
 {
     "type": "application",
     "source-directories": [
