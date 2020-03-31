@@ -235,6 +235,9 @@ This example assumes a `elm.json` project file in the source root.
 
 ## Discriminator Support
 
+> Thanks to @mhertogs, who contributed this feature.
+
+
 Currently, [discriminators](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#discriminatorObject) are only supported in Scala.
 
 In order to provide JSON conversion for these discriminators with Circe, we need to make use of [circe-generic-extras](https://github.com/circe/circe-generic-extras)
