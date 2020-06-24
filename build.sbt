@@ -22,7 +22,7 @@ val sharedSettings = Seq(
     "-Ywarn-numeric-widen",
     "-Ywarn-unused-import"
   )
-)
+) ++ publishSettings
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
@@ -48,6 +48,12 @@ lazy val publishSettings = Seq(
   publishArtifact in Test := false
 )
 
+lazy val noPublish = Seq(
+  publish := {},
+  publishLocal := {},
+  publishArtifact := false
+)
+
 lazy val testSettings = Seq(
   testFrameworks += new TestFramework("minitest.runner.Framework"),
   libraryDependencies ++= Seq(minitest, `logback-classic`).map(_ % "test")
@@ -66,3 +72,12 @@ lazy val plugin = project.in(file("plugin")).
     },
     scriptedBufferLog := false
   )
+
+lazy val root = project
+  .in(file("."))
+  .settings(sharedSettings)
+  .settings(noPublish)
+  .settings(
+    name := "sbt-openapi-schema"
+  )
+  .aggregate(plugin)
