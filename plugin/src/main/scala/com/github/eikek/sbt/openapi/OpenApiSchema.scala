@@ -28,6 +28,7 @@ object OpenApiSchema extends AutoPlugin {
     val openapiOutput = settingKey[File]("The directory where files are generated")
     val openapiCodegen = taskKey[Seq[File]]("Run the code generation")
     val openapiStaticDoc = taskKey[File]("Generate a static HTML documentation")
+    val openapiStaticArgs = settingKey[Seq[String]]("Additional options to the command. In- and out-file are provided by the plugin. It is `-l html2' by default")
     val openapiStaticOut = settingKey[File]("The target directory for static documentation")
   }
 
@@ -56,11 +57,13 @@ object OpenApiSchema extends AutoPlugin {
       generateCode(logger, out, lang, cfgJava, cfgScala, cfgElm, spec, pkg)
     },
     openapiStaticOut := (resourceManaged in Compile).value/"openapiDoc",
+    openapiStaticArgs := Seq("-l", "html2"),
     openapiStaticDoc := {
       val logger = streams.value.log
       val out = openapiStaticOut.value
       val spec = openapiSpec.value
-      createOpenapiStaticDoc(logger, spec, out)
+      val args = openapiStaticArgs.value
+      createOpenapiStaticDoc(logger, spec, args, out)
     }
   )
 
@@ -136,20 +139,15 @@ object OpenApiSchema extends AutoPlugin {
     singularSchemas ++ discriminantSchemas
   }
 
-  def createOpenapiStaticDoc(logger: Logger, openapi: File, out: File): File = {
+  def createOpenapiStaticDoc(logger: Logger, openapi: File, args: Seq[String], out: File): File = {
     val cl = Thread.currentThread.getContextClassLoader
-    val command = Array(
-      "generate",
-      "-i", openapi.toString,
-      "-l", "html2",
-      "-o", out.toString
-    )
+    val command = Seq("generate", "-i", openapi.toString) ++ args ++ Seq("-o", out.toString)
     logger.info(s"Creating static html rest documentation: ${command.toList}")
     IO.createDirectory(out)
     val file = out/"index.html"
     Thread.currentThread.setContextClassLoader(classOf[SwaggerCodegen].getClassLoader)
     try {
-      SwaggerCodegen.main(command)
+      SwaggerCodegen.main(command.toArray)
       // the above command starts a new thread that does the work so
       // the call returns immediately, but the file is still being
       // generated
