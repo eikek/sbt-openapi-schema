@@ -9,7 +9,7 @@ cache:
   directories:
     - $HOME/.ivy2/cache
     - $HOME/.sbt/boot
-
+    - $HOME/.coursier/cache
 
 before_script:
   - export TZ=Europe/Berlin
