@@ -1,6 +1,8 @@
 # SBT OpenApi Schema Codegen
 
-[![Build Status](https://img.shields.io/travis/eikek/sbt-openapi-schema/master.svg)](https://travis-ci.org/eikek/sbt-openapi-schema)
+[![Build Status](https://img.shields.io/travis/eikek/sbt-openapi-schema/master?style=flat-square)](https://travis-ci.org/eikek/sbt-openapi-schema)
+[![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
+[![License](https://img.shields.io/github/license/eikek/sbt-openapi-schema.svg?style=flat-square&color=steelblue)](https://github.com/eikek/sbt-openapi-schema/blob/master/LICENSE.txt)
 
 
 This is an sbt plugin to generate Scala, Java or Elm code given an
@@ -156,12 +158,9 @@ elm install elm/json
 elm install NoRedInk/elm-json-decode-pipeline
 ```
 
-While source files for scala and java are added to sbt's
-`sourceGenerators` so that they get compiled with your sources, the
-elm source files are added to the `resourceGenerators` list. The
-default output path for elm sources is `target/elm-src`. So in your
-`elm.json` file, add this directory to the `source-directories` list
-along with the main source dir. It may look something like this:
+The default output path for elm sources is `target/elm-src`. So in
+your `elm.json` file, add this directory to the `source-directories`
+list along with the main source dir. It may look something like this:
 
 ```json
 {
@@ -194,8 +193,12 @@ along with the main source dir. It may look something like this:
 
 It always generates type aliases for records.
 
-In the `build.sbt` file, it is then easy to compile all elm files
-during resource generation. Example:
+While source files for scala and java are added to sbt's
+`sourceGenerators` so that they get compiled with your sources, the
+elm source files are not added anywhere, because there is no support
+for Elm in sbt. However, in the `build.sbt` file, you can tell sbt to
+generate the files before compiling your elm app. This can be
+configured to run during resource generation. Example:
 
 ``` scala
 
@@ -217,6 +220,7 @@ val webapp = project.in(file("webapp")).
     openapiSpec := (Compile/resourceDirectory).value/"openapi.yml",
     openapiElmConfig := ElmConfig().withJson(ElmJson.decodePipeline),
     Compile/resourceGenerators += (Def.task {
+      openapiCodegen.value // generate api model files
       compileElm(streams.value.log
         , (Compile/baseDirectory).value
         , (Compile/resourceManaged).value

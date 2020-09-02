@@ -72,10 +72,6 @@ object OpenApiSchema extends AutoPlugin {
       Compile / sourceGenerators ++= {
         if (openapiTargetLanguage.value == Language.Elm) Seq.empty
         else Seq((Compile / openapiCodegen).taskValue)
-      },
-      Compile /resourceGenerators ++= {
-        if (openapiTargetLanguage.value != Language.Elm) Seq.empty
-        else Seq((Compile / openapiCodegen).taskValue)
       }
     )
 
