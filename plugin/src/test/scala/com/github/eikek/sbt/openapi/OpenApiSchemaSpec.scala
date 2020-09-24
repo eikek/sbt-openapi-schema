@@ -7,8 +7,8 @@ object OpenApiSchemaSpec extends SimpleTestSuite {
 
   test("Separating schemas") {
     val startingSchemas = Seq(
-      SingularSchemaClass("Foo", List(Property("thisIsAString", Type.String), Property("anotherField", Type.Int32)), discriminatorRef = Some("Stuff")),
-      SingularSchemaClass("Bar", List(Property("barField", Type.String), Property("newBool", Type.Bool)), discriminatorRef = Some("Stuff")),
+      SingularSchemaClass("Foo", List(Property("thisIsAString", Type.String), Property("anotherField", Type.Int32)), allOfRef = Some("Stuff")),
+      SingularSchemaClass("Bar", List(Property("barField", Type.String), Property("newBool", Type.Bool)), allOfRef = Some("Stuff")),
       SingularSchemaClass("Stuff", List(Property("type", Type.String, false, discriminator = true))),
       SingularSchemaClass("SingularThing", List(Property("first", Type.String), Property("second", Type.Bool)))
     )
@@ -17,8 +17,8 @@ object OpenApiSchemaSpec extends SimpleTestSuite {
     val expectedSchemas = Seq(
       SingularSchemaClass("SingularThing", List(Property("first", Type.String), Property("second", Type.Bool))),
       DiscriminantSchemaClass("Stuff", List(Property("type", Type.String, false, discriminator = true)), subSchemas = List(
-        SingularSchemaClass("Foo", List(Property("thisIsAString", Type.String), Property("anotherField", Type.Int32)), discriminatorRef = Some("Stuff")),
-        SingularSchemaClass("Bar", List(Property("barField", Type.String), Property("newBool", Type.Bool)), discriminatorRef = Some("Stuff"))
+        SingularSchemaClass("Foo", List(Property("thisIsAString", Type.String), Property("anotherField", Type.Int32)), allOfRef = Some("Stuff")),
+        SingularSchemaClass("Bar", List(Property("barField", Type.String), Property("newBool", Type.Bool)), allOfRef = Some("Stuff"))
       ))
     )
 

@@ -12,7 +12,7 @@ trait SchemaClass {
 case class SingularSchemaClass(name: String
                                , properties: List[Property] = Nil
                                , doc: Doc = Doc.empty
-                               , wrapper: Boolean = false, discriminatorRef: Option[String] = None) extends SchemaClass {
+                               , wrapper: Boolean = false, allOfRef: Option[String] = None) extends SchemaClass {
   def +(p: Property): SingularSchemaClass =
     copy(properties = p :: properties)
 
@@ -57,7 +57,7 @@ object SchemaClass {
 
   private def resolveFieldImports(src: SourceFile): SourceFile =
     src.fields.map(_.typeDef).
-      foldLeft(src){ (s, td) =>
+      foldLeft(src) { (s, td) =>
         s.addImports(td.imports)
       }
 }

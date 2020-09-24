@@ -39,7 +39,7 @@ object Parser {
               None
           }
         }
-        SingularSchemaClass(name, allProperties.toList.flatten, Doc(cs.getDescription.nullToEmpty), discriminatorRef = discriminatorOpt)
+        SingularSchemaClass(name, allProperties.toList.flatten, Doc(cs.getDescription.nullToEmpty), allOfRef = discriminatorOpt)
       case s if s.getProperties != null =>
         val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
         val discriminatorName = Option(s.getDiscriminator).map(_.getPropertyName)

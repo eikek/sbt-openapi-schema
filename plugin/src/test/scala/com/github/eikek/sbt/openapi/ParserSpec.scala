@@ -12,7 +12,7 @@ object ParserSpec extends SimpleTestSuite {
     val actual = schema("DiscriminatorObject")
 
     assertEquals(actual.name,"DiscriminatorObject")
-    assertEquals(actual.discriminatorRef, None)
+    assertEquals(actual.allOfRef, None)
     val propsWithNoDocs: Set[Property] = actual.properties.map(_.copy(doc = Doc.empty)).toSet
     assertEquals(propsWithNoDocs, Set(
       Property("type", Type.String, false, None, None, Doc.empty, true),
@@ -28,7 +28,7 @@ object ParserSpec extends SimpleTestSuite {
     val actual = schema("FirstDiscriminatorSubObject")
 
     assertEquals(actual.name,"FirstDiscriminatorSubObject")
-    assertEquals(actual.discriminatorRef, Some("DiscriminatorObject"))
+    assertEquals(actual.allOfRef, Some("DiscriminatorObject"))
     val propsWithNoDocs: Set[Property] = actual.properties.map(_.copy(doc = Doc.empty)).toSet
     assertEquals(propsWithNoDocs, Set(
       Property("uniqueString", Type.String, true, None, None, Doc.empty, false)
@@ -42,7 +42,7 @@ object ParserSpec extends SimpleTestSuite {
     val actual = schema("SecondDiscriminatorObject")
 
     assertEquals(actual.name,"SecondDiscriminatorObject")
-    assertEquals(actual.discriminatorRef, Some("DiscriminatorObject"))
+    assertEquals(actual.allOfRef, Some("DiscriminatorObject"))
     val propsWithNoDocs: Set[Property] = actual.properties.map(_.copy(doc = Doc.empty)).toSet
     assertEquals(propsWithNoDocs, Set(
       Property("uniqueInteger", Type.Int32, false, None, None, Doc.empty, false),
@@ -57,7 +57,7 @@ object ParserSpec extends SimpleTestSuite {
     val actual = schema("Room")
 
     assertEquals(actual.name,"Room")
-    assertEquals(actual.discriminatorRef, None)
+    assertEquals(actual.allOfRef, None)
     val propsWithNoDocs: Set[Property] = actual.properties.map(_.copy(doc = Doc.empty)).toSet
     assertEquals(propsWithNoDocs, Set(
       Property("name", Type.String, false, None, None, Doc.empty, false),
