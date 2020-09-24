@@ -12,7 +12,7 @@ trait SchemaClass {
 case class SingularSchemaClass(name: String
                                , properties: List[Property] = Nil
                                , doc: Doc = Doc.empty
-                               , wrapper: Boolean = false, allOfRef: Option[String] = None) extends SchemaClass {
+                               , wrapper: Boolean = false, allOfRef: Option[String] = None, oneOfRef: List[String] = Nil) extends SchemaClass {
   def +(p: Property): SingularSchemaClass =
     copy(properties = p :: properties)
 

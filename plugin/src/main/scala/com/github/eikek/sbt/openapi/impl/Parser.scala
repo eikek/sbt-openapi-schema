@@ -23,27 +23,37 @@ object Parser {
 
   def makeSchemaClass(name: String, schema: Schema[_]): SingularSchemaClass =
     schema match {
-      case cs: ComposedSchema =>
+      case cs: ComposedSchema if cs.getAllOf != null =>
         val allOfSchemas = cs.getAllOf.asScala
 
-        val discriminatorOpt = allOfSchemas.collectFirst {
+        val discriminatorPropertyOpt = allOfSchemas.collectFirst {
           case s: Schema[_] if s.getDiscriminator != null => s.getName
         } orElse allOfSchemas.collectFirst { case s: Schema[_] if s.get$ref() != null => s.get$ref().split('/').last }
 
-        val allProperties = allOfSchemas.flatMap { innerSchema =>
-          innerSchema match {
-            case s if s.getProperties != null =>
+        val allProperties = allOfSchemas.collect {
+          case s if s.getProperties != null =>
               val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
-              Option(s.getProperties.asScala.map({case (n, ps) => makeProperty(n, ps, required, None)}).toList)
-            case _ =>
-              None
-          }
+              s.getProperties.asScala.map({ case (n, ps) => makeProperty(n, ps, required, None) }).toList
+        }.flatten.toList
+        SingularSchemaClass(name, allProperties, Doc(cs.getDescription.nullToEmpty), allOfRef = discriminatorPropertyOpt)
+      case cs: ComposedSchema if cs.getOneOf != null =>
+        val oneOfSchemas = cs.getOneOf.asScala
+        val oneOfFields = oneOfSchemas.map { case s: Schema[_] if s.get$ref() != null => s.get$ref().split('/').last }.toList
+        val discriminatorProperty = Option(cs.getDiscriminator).map(_.getPropertyName).map { discriminatorName =>
+          Property(
+            name = discriminatorName
+            , `type` = Type.String
+            , format = None
+            , pattern = None
+            , doc = Doc.empty
+            , discriminator = true
+          )
         }
-        SingularSchemaClass(name, allProperties.toList.flatten, Doc(cs.getDescription.nullToEmpty), allOfRef = discriminatorOpt)
+        SingularSchemaClass(name, discriminatorProperty.toList, Doc(cs.getDescription.nullToEmpty), oneOfRef = oneOfFields)
       case s if s.getProperties != null =>
         val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
         val discriminatorName = Option(s.getDiscriminator).map(_.getPropertyName)
-        val props = s.getProperties.asScala.map({case (n, ps) => makeProperty(n, ps, required, discriminatorName)}).toList
+        val props = s.getProperties.asScala.map({ case (n, ps) => makeProperty(n, ps, required, discriminatorName) }).toList
         SingularSchemaClass(name, props, Doc(s.getDescription.nullToEmpty))
       case _ =>
         val discriminatorName = Option(schema.getDiscriminator).map(_.getPropertyName)
