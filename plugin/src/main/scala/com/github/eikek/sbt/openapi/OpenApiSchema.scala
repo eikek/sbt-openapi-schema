@@ -115,16 +115,24 @@ object OpenApiSchema extends AutoPlugin {
     files
   }
 
-  def groupDiscriminantSchemas(allSchemas: Seq[SingularSchemaClass]): Seq[SchemaClass] = {
-    val discriminantSchemasMap = allSchemas.filter(_.discriminatorRef.isDefined).groupBy(_.discriminatorRef.get)
-    val discriminantSchemas = discriminantSchemasMap.map { case (k, v) =>
-      val topLevelDiscriminant = allSchemas.collectFirst { case ssc if ssc.name == k => ssc }.get
+  def groupDiscriminantSchemas(parserResult: Seq[SingularSchemaClass]): Seq[SchemaClass] = {
+    val allSchemas = parserResult.map { ssc =>
+      val referencing = parserResult.find(_.oneOfRef.contains(ssc.name))
+      referencing match {
+        case Some(ref) => ssc.copy(allOfRef = Some(ref.name))
+        case None => ssc
+      }
+    }
+
+    val discriminantSchemasMap = allSchemas.filter(_.allOfRef.isDefined).groupBy(_.allOfRef.get)
+    val discriminantSchemas = discriminantSchemasMap.map { case (allOfRef, childSchemas) =>
+      val allOfRoot = allSchemas.collectFirst { case ssc if ssc.name == allOfRef => ssc }.get
       DiscriminantSchemaClass(
-        topLevelDiscriminant.name,
-        topLevelDiscriminant.properties,
-        topLevelDiscriminant.doc,
-        topLevelDiscriminant.wrapper,
-        v.toList
+        allOfRoot.name,
+        allOfRoot.properties,
+        allOfRoot.doc,
+        allOfRoot.wrapper,
+        childSchemas.toList
       )
     }.toSeq
 

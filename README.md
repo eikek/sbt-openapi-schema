@@ -241,8 +241,11 @@ This example assumes a `elm.json` project file in the source root.
 
 > Thanks to @mhertogs, who contributed this feature.
 
+OpenAPI 3.0 enables to introduce subtyping on generated schemas by using [discriminators](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#discriminatorObject).
 
-Currently, [discriminators](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#discriminatorObject) are only supported in Scala.
+Two of these are currently supported only in Scala : `oneOf` and `allOf`.   
+
+#### Setup
 
 In order to provide JSON conversion for these discriminators with Circe, we need to make use of [circe-generic-extras](https://github.com/circe/circe-generic-extras)
 
@@ -265,6 +268,9 @@ openapiScalaConfig := ScalaConfig().
 
 enablePlugins(OpenApiSchema)
 ```
+
+
+#### Handle `allOf` keywords in Scala
 
 Here is an example OpenAPI spec and the resulting Scala models with JSON conversions
 
@@ -348,6 +354,88 @@ object PetDto {
 Notes about the above example:
 - The internal schemas ("Dog" and "Cat") have private encoder/decoders so that they are only encoded and decoded as the trait interface. If you try to decode as a Dog or Cat type, the circe-generic-extras doesn't include the discriminant type
 - The mapping functionality (adding "Dto") is only used on the sealed trait since the discriminant type uses the name of the inner case classes ("Dog" and "Cat").
+
+#### Handle `oneOf` keywords in Scala
+
+Another way of transform composed schemas into `sealed trait` hierarchies is to use `oneOf`.
+
+```yaml 
+Pet:
+  type: object
+  discriminator:
+    propertyName: petType
+  oneOf:
+    - $ref: '#/components/schemas/Cat'
+    - $ref: '#/components/schemas/Dog'
+Cat:  ## "Cat" will be used as the discriminator value
+  description: A representation of a cat
+  properties:
+    huntingSkill:
+      type: string
+      description: The measured skill for hunting
+      enum:
+        - clueless
+        - lazy
+        - adventurous
+        - aggressive
+    name:
+      type: string
+    petType:
+      type: string
+  required:
+    - huntingSkill
+    - name
+    - petType
+Dog:  ## "Dog" will be used as the discriminator value
+  description: A representation of a dog
+  properties:
+    packSize:
+      type: integer
+      format: int32
+      description: the size of the pack the dog is from
+      default: 0
+      minimum: 0
+    name:
+      type: string
+    petType:
+      type: string
+  required:
+    - packSize
+    - name
+    - petType
+```
+
+```scala
+import io.circe._
+import io.circe.generic.extras.semiauto._
+import io.circe.generic.extras.Configuration
+
+sealed trait PetDto {
+} 
+object PetDto {
+  implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator("petType")
+  case class Cat (
+    huntingSkill: String, name: String, petType: String
+  ) extends PetDto
+  case class Dog (
+    packSize: Int, name: String, petType: String
+  ) extends PetDto
+  object Cat {
+    implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator("petType")
+    private implicit val jsonDecoder: Decoder[Cat] = deriveDecoder[Cat]
+    private implicit val jsonEncoder: Encoder[Cat] = deriveEncoder[Cat]
+  }
+  object Dog {
+    implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator("petType")
+    private implicit val jsonDecoder: Decoder[Dog] = deriveDecoder[Dog]
+    private implicit val jsonEncoder: Encoder[Dog] = deriveEncoder[Dog]
+  }
+  implicit val jsonDecoder: Decoder[PetDto] = deriveDecoder[PetDto]
+  implicit val jsonEncoder: Encoder[PetDto] = deriveEncoder[PetDto]
+} 
+```
+
+Unlike `allOf`, `oneOf` doesn't permit subschemas to inherit fields from their parent. This kind of relation fits well to algebraic data types encodings in Scala.
 
 ## TODOs
 
