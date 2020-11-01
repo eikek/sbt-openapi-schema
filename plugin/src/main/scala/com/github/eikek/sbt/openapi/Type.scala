@@ -12,20 +12,20 @@ object Type {
     val isCollection = true
   }
 
-  case object Bool extends PrimitiveType
-  case object String extends PrimitiveType
-  case object Int32 extends PrimitiveType
-  case object Int64 extends PrimitiveType
-  case object Float32 extends PrimitiveType
-  case object Float64 extends PrimitiveType
-  case object Uuid extends PrimitiveType
-  case object Url extends PrimitiveType
-  case object Uri extends PrimitiveType
-  case class Date(repr: TimeRepr) extends PrimitiveType
-  case class DateTime(repr: TimeRepr) extends PrimitiveType
-  case class Sequence(param: Type) extends CollectionType
+  case object Bool                       extends PrimitiveType
+  case object String                     extends PrimitiveType
+  case object Int32                      extends PrimitiveType
+  case object Int64                      extends PrimitiveType
+  case object Float32                    extends PrimitiveType
+  case object Float64                    extends PrimitiveType
+  case object Uuid                       extends PrimitiveType
+  case object Url                        extends PrimitiveType
+  case object Uri                        extends PrimitiveType
+  case class Date(repr: TimeRepr)        extends PrimitiveType
+  case class DateTime(repr: TimeRepr)    extends PrimitiveType
+  case class Sequence(param: Type)       extends CollectionType
   case class Map(key: Type, value: Type) extends CollectionType
-  case class Ref(name: String) extends PrimitiveType
+  case class Ref(name: String)           extends PrimitiveType
 
   sealed trait TimeRepr
   object TimeRepr {

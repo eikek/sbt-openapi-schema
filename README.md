@@ -239,8 +239,6 @@ This example assumes a `elm.json` project file in the source root.
 
 ## Discriminator Support
 
-> Thanks to @mhertogs, who contributed this feature.
-
 OpenAPI 3.0 enables to introduce subtyping on generated schemas by using [discriminators](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#discriminatorObject).
 
 Two of these are currently supported only in Scala : `oneOf` and `allOf`.   
@@ -447,3 +445,12 @@ Unlike `allOf`, `oneOf` doesn't permit subschemas to inherit fields from their p
 - add more integration tests
   - see [Testing SBT Plugins](https://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins.html)
   - see `plugin/src/sbt-test/*`
+
+## Credits
+
+First, thank you all who reported issues! It follows a list of
+contributions in form of code. If you find yourself missing, please
+let me know or open a PR.
+
+- @xela85 for adding `oneOf` keywords support (#42)
+- @mhertogs for adding support for discriminators (#8)

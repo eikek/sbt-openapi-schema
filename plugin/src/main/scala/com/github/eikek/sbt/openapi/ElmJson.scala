@@ -31,8 +31,13 @@ object ElmJson {
     }
 
     def resolve(src: SourceFile): SourceFile =
-      src.addImports(Imports("Json.Decode as Decode", "Json.Decode.Pipeline as P", "Json.Encode as Encode"))
-
+      src.addImports(
+        Imports(
+          "Json.Decode as Decode",
+          "Json.Decode.Pipeline as P",
+          "Json.Encode as Encode"
+        )
+      )
 
     private def codecForType(dir: Direction, pkg: Pkg, t: Type): Part = t match {
       case Type.Sequence(param) =>
@@ -71,44 +76,63 @@ object ElmJson {
             codecForType(dir, pkg, field.prop.`type`)
         }
         if (field.nullablePrimitive) {
-          if (dir == Direction.Dec) Part.concat(Part(s"(${dir.name}.maybe "), codec, Part(")"))
-          else Part.concat(Part("(Maybe.map "), codec, Part(" >> Maybe.withDefault Encode.null)"))
+          if (dir == Direction.Dec)
+            Part.concat(Part(s"(${dir.name}.maybe "), codec, Part(")"))
+          else
+            Part.concat(
+              Part("(Maybe.map "),
+              codec,
+              Part(" >> Maybe.withDefault Encode.null)")
+            )
         } else {
           codec
         }
-      }
+    }
 
     private val decodeField: PartConv[(Pkg, Field)] =
       constant("|>").map(_.indent(4)) ~ constant("P.required") ~
-      fieldName.contramap[(Pkg, Field)](_._2).map(_.quoted) ~ codecForField(Direction.Dec)
+        fieldName.contramap[(Pkg, Field)](_._2).map(_.quoted) ~ codecForField(
+          Direction.Dec
+        )
 
     private val decoderObject: PartConv[SourceFile] =
       constant("decoder: Decode.Decoder") ~ sourceName ++
-      constant("decoder =") ++
-      constant("Decode.succeed").map(_.indent(2)) ~ sourceName ++
-      forList(decodeField, _ ++ _).contramap(src => src.fields.map(f => (src.pkg, f)))
+        constant("decoder =") ++
+        constant("Decode.succeed").map(_.indent(2)) ~ sourceName ++
+        forList(decodeField, _ ++ _).contramap(src => src.fields.map(f => (src.pkg, f)))
 
     private val decoderWrapper: PartConv[SourceFile] =
       constant("decoder: Decode.Decoder") ~ sourceName ++
-      constant("decoder =") ++
-      constant("Decode.map").map(_.indent(2)) ~ sourceName ~ codecForField(Direction.Dec).contramap(src => (src.pkg, src.fields.head))
+        constant("decoder =") ++
+        constant("Decode.map").map(_.indent(2)) ~ sourceName ~ codecForField(
+          Direction.Dec
+        ).contramap(src => (src.pkg, src.fields.head))
 
     private val encodeField: PartConv[(Pkg, Field)] =
-      constant("(") ~ fieldName.contramap[(Pkg, Field)](_._2).map(_.quoted) + constant(", (") +
-      codecForField(Direction.Enc) ~ constant("value.") + fieldName.contramap[(Pkg, Field)](_._2) + constant(") )")
+      constant("(") ~ fieldName.contramap[(Pkg, Field)](_._2).map(_.quoted) + constant(
+        ", ("
+      ) +
+        codecForField(Direction.Enc) ~ constant("value.") + fieldName
+          .contramap[(Pkg, Field)](_._2) + constant(") )")
 
     private val encoderObject: PartConv[SourceFile] =
       constant("encode:") ~ sourceName ~ constant("->") ~ constant("Encode.Value") ++
-      constant("encode value =") ++
-      constant("Encode.object").map(_.indent(2)) ++
-      constant("[").map(_.indent(4)) ~
-      forListSep(encodeField, Part("\n    , ")).contramap(src => src.fields.map(f => (src.pkg, f))) ++
-      constant("]").map(_.indent(4))
+        constant("encode value =") ++
+        constant("Encode.object").map(_.indent(2)) ++
+        constant("[").map(_.indent(4)) ~
+        forListSep(encodeField, Part("\n    , ")).contramap(src =>
+          src.fields.map(f => (src.pkg, f))
+        ) ++
+        constant("]").map(_.indent(4))
 
     private val encoderWrapper: PartConv[SourceFile] =
       constant("encode:") ~ sourceName ~ constant("->") ~ constant("Encode.Value") ++
-      constant("encode value =") ++
-      codecForField(Direction.Enc).map(_.indent(2)).contramap[SourceFile](src => (src.pkg, src.fields.head)) ~ constant("value.value")
+        constant("encode value =") ++
+        codecForField(Direction.Enc)
+          .map(_.indent(2))
+          .contramap[SourceFile](src => (src.pkg, src.fields.head)) ~ constant(
+          "value.value"
+        )
 
     private val decoder: PartConv[SourceFile] =
       cond(_.wrapper, decoderWrapper, decoderObject)

@@ -45,29 +45,30 @@ object PartConv {
 
   def forListSep[A](pc: PartConv[A], sep: Part): PartConv[List[A]] =
     PartConv {
-      case Nil => Part.empty
+      case Nil  => Part.empty
       case list => list.map(pc.toPart).reduce((a, b) => a + sep + b)
     }
 
   def listSplit[A](psingle: PartConv[A], plist: PartConv[List[A]]): PartConv[List[A]] =
     PartConv {
-      case Nil => Part.empty
+      case Nil      => Part.empty
       case a :: Nil => psingle.toPart(a)
-      case a :: as => psingle.toPart(a) ~ plist.toPart(as)
+      case a :: as  => psingle.toPart(a) ~ plist.toPart(as)
     }
 
   val string: PartConv[String] =
     PartConv(s => Part(s))
 
   val imports: PartConv[Imports] =
-    forList(string, _ ++ _).contramap[Imports](_.lines.map(l => "import "+ l))
+    forList(string, _ ++ _).contramap[Imports](_.lines.map(l => "import " + l))
 
   val pkg: PartConv[Pkg] =
     PartConv(p => Part(s"package ${p.name}"))
 
   val doc: PartConv[Doc] = PartConv(d =>
     if (d.isEmpty) Part.empty
-    else Part("/**") ++ Part(d.text).prefix(" * ") ++ Part(" */"))
+    else Part("/**") ++ Part(d.text).prefix(" * ") ++ Part(" */")
+  )
 
   val annotation: PartConv[Annotation] =
     PartConv(annot => Part(annot.render))
@@ -85,11 +86,15 @@ object PartConv {
     string.contramap(_.typeDef.name)
 
   val discriminantType: PartConv[SourceFile] =
-    string.contramap(_.fields.collectFirst { case f if f.prop.discriminator => f.prop.name}.getOrElse("type") )
+    string.contramap(
+      _.fields
+        .collectFirst { case f if f.prop.discriminator => f.prop.name }
+        .getOrElse("type")
+    )
 
   val accessModifier: PartConv[SourceFile] =
     cond(_.isInternal, constant("private "), empty)
 
   def cond[A](p: A => Boolean, when: PartConv[A], otherwise: PartConv[A]): PartConv[A] =
-    PartConv(a  => if (p(a)) when.toPart(a) else otherwise.toPart(a))
+    PartConv(a => if (p(a)) when.toPart(a) else otherwise.toPart(a))
 }

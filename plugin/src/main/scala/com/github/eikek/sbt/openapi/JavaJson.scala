@@ -10,7 +10,7 @@ trait JavaJson {
 
 object JavaJson {
   val none = new JavaJson {
-    def resolve(src: SourceFile): SourceFile = src
+    def resolve(src: SourceFile): SourceFile                  = src
     def builderAnnotations(src: SourceFile): List[Annotation] = Nil
   }
 
@@ -19,11 +19,12 @@ object JavaJson {
     def jacksonDeserializer(src: SourceFile) =
       Annotation(s"@JsonDeserialize(builder = ${src.name}.Builder.class)")
     def jacksonIgnore(src: SourceFile) = {
-      val props = src.fields.
-        map(_.prop).
-        filter(_.nullable).
-        map(_.name).
-        map(n => "\"" + n + "Optional\"").mkString(", ")
+      val props = src.fields
+        .map(_.prop)
+        .filter(_.nullable)
+        .map(_.name)
+        .map(n => "\"" + n + "Optional\"")
+        .mkString(", ")
       Annotation(s"@JsonIgnoreProperties({ $props })")
     }
     def jacksonAutoDetect =
@@ -34,18 +35,31 @@ object JavaJson {
 
     def resolve(src: SourceFile): SourceFile =
       if (src.wrapper) {
-        src.addImports(Imports("com.fasterxml.jackson.annotation.JsonValue", "com.fasterxml.jackson.annotation.JsonCreator")).
-          copy(fields = src.fields.map(f => Field(f.prop, List(Annotation("@JsonValue")), f.typeDef))).
-          addCtorAnnotation(Annotation("@JsonCreator"))
+        src
+          .addImports(
+            Imports(
+              "com.fasterxml.jackson.annotation.JsonValue",
+              "com.fasterxml.jackson.annotation.JsonCreator"
+            )
+          )
+          .copy(fields =
+            src.fields.map(f => Field(f.prop, List(Annotation("@JsonValue")), f.typeDef))
+          )
+          .addCtorAnnotation(Annotation("@JsonCreator"))
       } else {
-        src.addAnnotation(jacksonDeserializer(src)).
-          addAnnotation(jacksonIgnore(src)).
-          addAnnotation(jacksonAutoDetect).
-          addImports(Imports("com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder"
-            , "com.fasterxml.jackson.databind.annotation.JsonDeserialize"
-            , "com.fasterxml.jackson.annotation.JsonIgnoreProperties"
-            , "com.fasterxml.jackson.annotation.JsonAutoDetect"
-            , "com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility"))
+        src
+          .addAnnotation(jacksonDeserializer(src))
+          .addAnnotation(jacksonIgnore(src))
+          .addAnnotation(jacksonAutoDetect)
+          .addImports(
+            Imports(
+              "com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder",
+              "com.fasterxml.jackson.databind.annotation.JsonDeserialize",
+              "com.fasterxml.jackson.annotation.JsonIgnoreProperties",
+              "com.fasterxml.jackson.annotation.JsonAutoDetect",
+              "com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility"
+            )
+          )
       }
 
     def builderAnnotations(src: SourceFile): List[Annotation] =
