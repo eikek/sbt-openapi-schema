@@ -1,4 +1,5 @@
 import Dependencies._
+import ReleaseTransformations._
 
 scalaVersion in ThisBuild := "2.12.8"
 
@@ -40,12 +41,24 @@ lazy val publishSettings = Seq(
       email = ""
     )
   ),
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-    else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  },
-  publishArtifact in Test := false
+  homepage := Some(url("https://github.com/eikek/sbt-openapi-schema")),
+  publishTo := sonatypePublishToBundle.value,
+  publishArtifact in Test := false,
+  releaseCrossBuild := false,
+  releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    runClean,
+    runTest,
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    releaseStepCommandAndRemaining("publishSigned"),
+    releaseStepCommand("sonatypeBundleRelease"),
+    setNextVersion,
+    commitNextVersion,
+    pushChanges
+  )
 )
 
 lazy val noPublish = Seq(
