@@ -1,7 +1,8 @@
 package com.github.eikek.sbt.openapi
 
-case class ScalaConfig(mapping: CustomMapping = CustomMapping.none
-  , json: ScalaJson = ScalaJson.none
+case class ScalaConfig(
+    mapping: CustomMapping = CustomMapping.none,
+    json: ScalaJson = ScalaJson.none
 ) {
 
   def withJson(json: ScalaJson): ScalaConfig =

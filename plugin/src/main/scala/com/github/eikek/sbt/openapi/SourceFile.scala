@@ -1,16 +1,18 @@
 package com.github.eikek.sbt.openapi
 
-case class SourceFile(name: String
-  , pkg: Pkg
-  , imports: Imports
-  , annot: List[Annotation]
-  , ctorAnnot: List[Annotation]
-  , doc: Doc
-  , fields: List[Field]
-  , parents: List[Superclass] = Nil
-  , wrapper: Boolean
-  , internalSchemas: List[SourceFile]
-  , isInternal: Boolean = false) {
+case class SourceFile(
+    name: String,
+    pkg: Pkg,
+    imports: Imports,
+    annot: List[Annotation],
+    ctorAnnot: List[Annotation],
+    doc: Doc,
+    fields: List[Field],
+    parents: List[Superclass] = Nil,
+    wrapper: Boolean,
+    internalSchemas: List[SourceFile],
+    isInternal: Boolean = false
+) {
 
   def addFields(fs: List[Field]): SourceFile =
     copy(fields = fields ++ fs)

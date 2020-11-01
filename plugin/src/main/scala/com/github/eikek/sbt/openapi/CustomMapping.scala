@@ -17,10 +17,12 @@ trait CustomMapping { self =>
 
 object CustomMapping {
 
-  def apply(tf: PartialFunction[TypeDef, TypeDef]
-    , sf: PartialFunction[SourceFile, SourceFile]): CustomMapping =
+  def apply(
+      tf: PartialFunction[TypeDef, TypeDef],
+      sf: PartialFunction[SourceFile, SourceFile]
+  ): CustomMapping =
     new CustomMapping {
-      def changeType(td: TypeDef) = tf.lift(td).getOrElse(td)
+      def changeType(td: TypeDef)       = tf.lift(td).getOrElse(td)
       def changeSource(src: SourceFile) = sf.lift(src).getOrElse(src)
     }
 
@@ -34,25 +36,31 @@ object CustomMapping {
     def changeRef(field: Field): Field =
       field.prop.`type` match {
         case Type.Ref(name) =>
-          field.copy(prop = field.prop.copy(`type` = Type.Ref(f.lift(name).getOrElse(name))))
+          field.copy(prop =
+            field.prop.copy(`type` = Type.Ref(f.lift(name).getOrElse(name)))
+          )
         case Type.Sequence(Type.Ref(name)) =>
-          field.copy(prop = field.prop.copy(`type` = Type.Sequence(Type.Ref(f.lift(name).getOrElse(name)))))
+          field.copy(prop =
+            field.prop.copy(`type` =
+              Type.Sequence(Type.Ref(f.lift(name).getOrElse(name)))
+            )
+          )
         case Type.Map(kt, vt) =>
           val ktn = kt match {
             case Type.Ref(name) => Type.Ref(f.lift(name).getOrElse(name))
-            case _ => kt
+            case _              => kt
           }
           val vtn = vt match {
             case Type.Ref(name) => Type.Ref(f.lift(name).getOrElse(name))
-            case _ => vt
+            case _              => vt
           }
           field.copy(prop = field.prop.copy(`type` = Type.Map(ktn, vtn)))
         case _ => field
       }
 
     forSource({ case s =>
-      s.copy(name = f.lift(s.name).getOrElse(s.name)).
-        copy(fields = s.fields.map(changeRef))
+      s.copy(name = f.lift(s.name).getOrElse(s.name))
+        .copy(fields = s.fields.map(changeRef))
     })
   }
 

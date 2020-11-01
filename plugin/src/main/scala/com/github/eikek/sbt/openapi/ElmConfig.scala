@@ -1,7 +1,8 @@
 package com.github.eikek.sbt.openapi
 
-case class ElmConfig(mapping: CustomMapping = CustomMapping.none
-  , json: ElmJson = ElmJson.none
+case class ElmConfig(
+    mapping: CustomMapping = CustomMapping.none,
+    json: ElmJson = ElmJson.none
 ) {
 
   def withJson(json: ElmJson): ElmConfig =

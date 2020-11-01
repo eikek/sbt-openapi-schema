@@ -12,24 +12,40 @@ trait ScalaJson {
 
 object ScalaJson {
   val none = new ScalaJson {
-    def companion = PartConv(_ => Part.empty)
+    def companion                            = PartConv(_ => Part.empty)
     def resolve(src: SourceFile): SourceFile = src
   }
 
   val circeSemiauto = new ScalaJson {
     val props: PartConv[SourceFile] =
       constant("object") ~ sourceName ~ constant("{") ++
-        constant("implicit val jsonDecoder: io.circe.Decoder[").map(_.indent(2)) + sourceName + constant("] = io.circe.generic.semiauto.deriveDecoder[") + sourceName + constant("]") ++
-        constant("implicit val jsonEncoder: io.circe.Encoder[").map(_.indent(2)) + sourceName + constant("] = io.circe.generic.semiauto.deriveEncoder[") + sourceName + constant("]") ++
+        constant("implicit val jsonDecoder: io.circe.Decoder[").map(
+          _.indent(2)
+        ) + sourceName + constant(
+          "] = io.circe.generic.semiauto.deriveDecoder["
+        ) + sourceName + constant("]") ++
+        constant("implicit val jsonEncoder: io.circe.Encoder[").map(
+          _.indent(2)
+        ) + sourceName + constant(
+          "] = io.circe.generic.semiauto.deriveEncoder["
+        ) + sourceName + constant("]") ++
         constant("}")
 
     val wrapper: PartConv[SourceFile] =
       constant("object") ~ sourceName ~ constant("{") ++
-        constant("implicit def jsonDecoder(implicit vd: io.circe.Decoder[").map(_.indent(2)) +
-        fieldType.contramap[SourceFile](_.fields.head) + constant("]): io.circe.Decoder[") + sourceName + constant("] =") ++
+        constant("implicit def jsonDecoder(implicit vd: io.circe.Decoder[").map(
+          _.indent(2)
+        ) +
+        fieldType.contramap[SourceFile](_.fields.head) + constant(
+          "]): io.circe.Decoder["
+        ) + sourceName + constant("] =") ++
         constant("vd.map(").map(_.indent(4)) + sourceName + constant(".apply)") ++
-        constant("implicit def jsonEncoder(implicit ve: io.circe.Encoder[").map(_.indent(2)) +
-        fieldType.contramap[SourceFile](_.fields.head) + constant("]): io.circe.Encoder[") + sourceName + constant("] =") ++
+        constant("implicit def jsonEncoder(implicit ve: io.circe.Encoder[").map(
+          _.indent(2)
+        ) +
+        fieldType.contramap[SourceFile](_.fields.head) + constant(
+          "]): io.circe.Encoder["
+        ) + sourceName + constant("] =") ++
         constant("ve.contramap(_.value)").map(_.indent(4)) ++
         constant("}")
 
@@ -43,32 +59,58 @@ object ScalaJson {
   val circeSemiautoExtra = new ScalaJson {
 
     val discriminantProps: PartConv[SourceFile] =
-      constant("implicit val jsonDecoder: io.circe.Decoder[") + sourceName + constant("] = io.circe.generic.extras.semiauto.deriveDecoder[") + sourceName + constant("]") ++
-        constant("implicit val jsonEncoder: io.circe.Encoder[") + sourceName + constant("] = io.circe.generic.extras.semiauto.deriveEncoder[") + sourceName + constant("]")
+      constant("implicit val jsonDecoder: io.circe.Decoder[") + sourceName + constant(
+        "] = io.circe.generic.extras.semiauto.deriveDecoder["
+      ) + sourceName + constant("]") ++
+        constant("implicit val jsonEncoder: io.circe.Encoder[") + sourceName + constant(
+          "] = io.circe.generic.extras.semiauto.deriveEncoder["
+        ) + sourceName + constant("]")
 
     val props: PartConv[SourceFile] =
       constant("object") ~ sourceName ~ constant("{") ++
-        constant("implicit val customConfig: io.circe.generic.extras.Configuration = io.circe.generic.extras.Configuration.default.withDefaults.withDiscriminator(\"").map(_.indent(2)) + discriminantType + constant("\")") ++
-        (accessModifier + constant("implicit val jsonDecoder: io.circe.Decoder[")).map(_.indent(2)) + sourceName + constant("] = io.circe.generic.extras.semiauto.deriveDecoder[") + sourceName + constant("]") ++
-        (accessModifier + constant("implicit val jsonEncoder: io.circe.Encoder[")).map(_.indent(2)) + sourceName + constant("] = io.circe.generic.extras.semiauto.deriveEncoder[") + sourceName + constant("]") ++
+        constant(
+          "implicit val customConfig: io.circe.generic.extras.Configuration = io.circe.generic.extras.Configuration.default.withDefaults.withDiscriminator(\""
+        ).map(_.indent(2)) + discriminantType + constant("\")") ++
+        (accessModifier + constant("implicit val jsonDecoder: io.circe.Decoder[")).map(
+          _.indent(2)
+        ) + sourceName + constant(
+          "] = io.circe.generic.extras.semiauto.deriveDecoder["
+        ) + sourceName + constant("]") ++
+        (accessModifier + constant("implicit val jsonEncoder: io.circe.Encoder[")).map(
+          _.indent(2)
+        ) + sourceName + constant(
+          "] = io.circe.generic.extras.semiauto.deriveEncoder["
+        ) + sourceName + constant("]") ++
         constant("}")
 
     val wrapper: PartConv[SourceFile] =
       constant("object") ~ sourceName ~ constant("{") ++
-        constant("implicit val customConfig: io.circe.generic.extras.Configuration = io.circe.generic.extras.Configuration.default.withDefaults.withDiscriminator(\"").map(_.indent(2)) + discriminantType + constant("\")") ++
-        (accessModifier + constant("implicit def jsonDecoder(implicit vd: io.circe.Decoder[")).map(_.indent(2)) +
-        fieldType.contramap[SourceFile](_.fields.head) + constant("]): io.circe.Decoder[") + sourceName + constant("] =") ++
+        constant(
+          "implicit val customConfig: io.circe.generic.extras.Configuration = io.circe.generic.extras.Configuration.default.withDefaults.withDiscriminator(\""
+        ).map(_.indent(2)) + discriminantType + constant("\")") ++
+        (accessModifier + constant(
+          "implicit def jsonDecoder(implicit vd: io.circe.Decoder["
+        )).map(_.indent(2)) +
+        fieldType.contramap[SourceFile](_.fields.head) + constant(
+          "]): io.circe.Decoder["
+        ) + sourceName + constant("] =") ++
         constant("vd.map(").map(_.indent(4)) + sourceName + constant(".apply)") ++
-        (accessModifier + constant("implicit def jsonEncoder(implicit ve: io.circe.Encoder[")).map(_.indent(2)) +
-        fieldType.contramap[SourceFile](_.fields.head) + constant("]): io.circe.Encoder[") + sourceName + constant("] =") ++
+        (accessModifier + constant(
+          "implicit def jsonEncoder(implicit ve: io.circe.Encoder["
+        )).map(_.indent(2)) +
+        fieldType.contramap[SourceFile](_.fields.head) + constant(
+          "]): io.circe.Encoder["
+        ) + sourceName + constant("] =") ++
         constant("ve.contramap(_.value)").map(_.indent(4)) ++
         constant("}")
 
-    override def companion: PartConv[SourceFile] = cond(_.internalSchemas.isEmpty, singular, discriminant)
+    override def companion: PartConv[SourceFile] =
+      cond(_.internalSchemas.isEmpty, singular, discriminant)
 
     def singular: PartConv[SourceFile] = cond(_.wrapper, wrapper, props)
     def discriminant: PartConv[SourceFile] =
-      forList(singular, _ ++ _).contramap[SourceFile](_.internalSchemas) ++ discriminantProps
+      forList(singular, _ ++ _)
+        .contramap[SourceFile](_.internalSchemas) ++ discriminantProps
 
     override def resolve(src: SourceFile): SourceFile =
       src

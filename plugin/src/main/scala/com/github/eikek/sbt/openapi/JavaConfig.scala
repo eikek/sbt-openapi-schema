@@ -1,8 +1,10 @@
 package com.github.eikek.sbt.openapi
 
-case class JavaConfig(mapping: CustomMapping = CustomMapping.none
-  , json: JavaJson = JavaJson.none
-  , builderParents: List[Superclass] = Nil) {
+case class JavaConfig(
+    mapping: CustomMapping = CustomMapping.none,
+    json: JavaJson = JavaJson.none,
+    builderParents: List[Superclass] = Nil
+) {
 
   def withJson(json: JavaJson): JavaConfig =
     copy(json = json)
