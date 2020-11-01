@@ -60,7 +60,7 @@ object ScalaCode {
       forList(internalCaseClass, _ ++ _).contramap(_.internalSchemas)
 
     constant("object") ~ sourceName ~ forList(annotation, _ ++ _).contramap[SourceFile](_.ctorAnnot) ~ constant("{") ++
-      constant("implicit val customConfig: Configuration = Configuration.default.withDefaults.withDiscriminator(\"").map(_.indent(2)) + discriminantType + constant("\")") ++
+      constant("implicit val customConfig: io.circe.generic.extras.Configuration = io.circe.generic.extras.Configuration.default.withDefaults.withDiscriminator(\"").map(_.indent(2)) + discriminantType + constant("\")") ++
       internalCaseClasses.map(_.indent(2)) ++
       cfg.json.companion.map(_.indent(2)) ++
       constant("}") ~ parents.map(_.newline).contramap(_.parents)
