@@ -12,7 +12,7 @@ object Dependencies {
 
   // https://github.com/monix/minitest
   // Apache 2.0
-  val minitest = "io.monix" %% "minitest" % "2.9.1"
+  val minitest = "io.monix" %% "minitest" % "2.9.2"
   val `minitest-laws` = "io.monix" %% "minitest-laws" % "2.7.0"
 
 }
