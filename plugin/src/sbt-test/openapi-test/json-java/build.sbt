@@ -2,7 +2,7 @@ import com.github.eikek.sbt.openapi._
 
 name := "sbt-openapi-simple-test"
 version := "0.0.1"
-scalaVersion := "2.12.13"
+scalaVersion := "2.13.5"
 
 libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.8",
