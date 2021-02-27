@@ -2,7 +2,7 @@ import com.github.eikek.sbt.openapi._
 
 name := "sbt-openapi-simple-test"
 version := "0.0.1"
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.13"
 
 enablePlugins(OpenApiSchema)
 openapiTargetLanguage := Language.Java

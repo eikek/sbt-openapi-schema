@@ -1,12 +1,12 @@
 import Dependencies._
 import ReleaseTransformations._
 
-scalaVersion in ThisBuild := "2.12.8"
+scalaVersion in ThisBuild := "2.12.13"
 
 val sharedSettings = Seq(
   name := "sbt-openapi-schema",
   organization := "com.github.eikek",
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.12.13",
   licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
   homepage := Some(url("https://github.com/eikek")),
   scalacOptions in (Compile, console) := Seq(),
