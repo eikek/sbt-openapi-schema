@@ -2,6 +2,7 @@ import Dependencies._
 import ReleaseTransformations._
 
 ThisBuild / scalaVersion := "2.12.13"
+ThisBuild / versionScheme := Some("early-semver")
 
 addCommandAlias("ci", "; lint; test; scripted; publishLocal")
 addCommandAlias(
@@ -15,7 +16,7 @@ val sharedSettings = Seq(
   organization := "com.github.eikek",
   scalaVersion := "2.12.13",
   licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
-  homepage := Some(url("https://github.com/eikek")),
+  homepage := Some(url("https://github.com/eikek/sbt-openapi-schema")),
   Compile / console / scalacOptions := Seq(),
   scalacOptions ++= Seq(
     "-encoding",
@@ -35,7 +36,6 @@ val sharedSettings = Seq(
 ) ++ publishSettings
 
 lazy val publishSettings = Seq(
-  publishMavenStyle := true,
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/eikek/sbt-openapi-schema.git"),
@@ -51,7 +51,6 @@ lazy val publishSettings = Seq(
     )
   ),
   homepage := Some(url("https://github.com/eikek/sbt-openapi-schema")),
-  publishTo := sonatypePublishToBundle.value,
   Test / publishArtifact := false,
   releaseCrossBuild := false,
   releaseProcess := Seq[ReleaseStep](
