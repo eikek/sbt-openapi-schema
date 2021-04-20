@@ -1,7 +1,15 @@
 import Dependencies._
 import ReleaseTransformations._
 
-scalaVersion in ThisBuild := "2.12.13"
+ThisBuild / scalaVersion := "2.12.13"
+
+addCommandAlias("ci", "; lint; test; scripted; publishLocal")
+addCommandAlias(
+  "lint",
+  "; scalafmtSbtCheck; scalafmtCheckAll; Compile/scalafix --check; Test/scalafix --check"
+)
+addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmtAll")
+
 
 val sharedSettings = Seq(
   name := "sbt-openapi-schema",
@@ -9,7 +17,7 @@ val sharedSettings = Seq(
   scalaVersion := "2.12.13",
   licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
   homepage := Some(url("https://github.com/eikek")),
-  scalacOptions in (Compile, console) := Seq(),
+  Compile / console / scalacOptions := Seq(),
   scalacOptions ++= Seq(
     "-encoding", "UTF-8",
     "-Xfatal-warnings", // fail when there are warnings
@@ -21,7 +29,8 @@ val sharedSettings = Seq(
     "-Yno-adapted-args",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused-import"
+    "-Ywarn-unused-import",
+    "-Wconf:cat=unused-nowarn:s"
   )
 ) ++ publishSettings
 
@@ -43,7 +52,7 @@ lazy val publishSettings = Seq(
   ),
   homepage := Some(url("https://github.com/eikek/sbt-openapi-schema")),
   publishTo := sonatypePublishToBundle.value,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   releaseCrossBuild := false,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
@@ -72,11 +81,19 @@ lazy val testSettings = Seq(
   libraryDependencies ++= Seq(minitest, `logback-classic`).map(_ % "test")
 )
 
+val scalafixSettings = Seq(
+  semanticdbEnabled := true,                        // enable SemanticDB
+  semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+  ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
+)
+
+
 lazy val plugin = project.in(file("plugin")).
   enablePlugins(SbtPlugin).
   settings(sharedSettings).
   settings(publishSettings).
   settings(testSettings).
+  settings(scalafixSettings).
   settings(
     sbtPlugin := true,
     libraryDependencies ++= Seq(`swagger-parser`, swaggerCodegen),
