@@ -1,7 +1,7 @@
 package com.github.eikek.sbt.openapi.impl
 
+import com.github.eikek.sbt.openapi.PartConv._
 import com.github.eikek.sbt.openapi._
-import PartConv._
 
 object JavaCode {
 

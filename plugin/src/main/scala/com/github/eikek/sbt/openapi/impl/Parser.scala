@@ -1,11 +1,11 @@
 package com.github.eikek.sbt.openapi.impl
 
-import io.swagger.v3.parser.OpenAPIV3Parser
-import io.swagger.v3.oas.models.media._
 import scala.collection.JavaConverters._
 
-import StringUtil._
 import com.github.eikek.sbt.openapi._
+import com.github.eikek.sbt.openapi.impl.StringUtil._
+import io.swagger.v3.oas.models.media._
+import io.swagger.v3.parser.OpenAPIV3Parser
 
 object Parser {
   private val parser = new OpenAPIV3Parser()
