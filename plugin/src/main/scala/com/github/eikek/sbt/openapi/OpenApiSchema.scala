@@ -1,10 +1,11 @@
 package com.github.eikek.sbt.openapi
 
+import scala.concurrent.duration._
+
 import _root_.io.swagger.codegen.v3.cli.SwaggerCodegen
 import com.github.eikek.sbt.openapi.impl._
 import sbt.Keys._
 import sbt._
-import scala.concurrent.duration._
 
 object OpenApiSchema extends AutoPlugin {
 
@@ -62,7 +63,7 @@ object OpenApiSchema extends AutoPlugin {
       val lang     = openapiTargetLanguage.value
       generateCode(logger, out, lang, cfgJava, cfgScala, cfgElm, spec, pkg)
     },
-    openapiStaticOut := (resourceManaged in Compile).value / "openapiDoc",
+    openapiStaticOut := (Compile / resourceManaged).value / "openapiDoc",
     openapiStaticArgs := Seq("-l", "html2"),
     openapiStaticDoc := {
       val logger = streams.value.log

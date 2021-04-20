@@ -1,7 +1,7 @@
 package com.github.eikek.sbt.openapi
 
-import minitest._
 import com.github.eikek.sbt.openapi.impl._
+import minitest._
 
 object CodegenSpec extends SimpleTestSuite {
 

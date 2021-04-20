@@ -10,7 +10,6 @@ addCommandAlias(
 )
 addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmtAll")
 
-
 val sharedSettings = Seq(
   name := "sbt-openapi-schema",
   organization := "com.github.eikek",
@@ -19,7 +18,8 @@ val sharedSettings = Seq(
   homepage := Some(url("https://github.com/eikek")),
   Compile / console / scalacOptions := Seq(),
   scalacOptions ++= Seq(
-    "-encoding", "UTF-8",
+    "-encoding",
+    "UTF-8",
     "-Xfatal-warnings", // fail when there are warnings
     "-deprecation",
     "-feature",
@@ -87,18 +87,20 @@ val scalafixSettings = Seq(
   ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 )
 
-
-lazy val plugin = project.in(file("plugin")).
-  enablePlugins(SbtPlugin).
-  settings(sharedSettings).
-  settings(publishSettings).
-  settings(testSettings).
-  settings(scalafixSettings).
-  settings(
+lazy val plugin = project
+  .in(file("plugin"))
+  .withId("sbt-openapi-schema")
+  .enablePlugins(SbtPlugin)
+  .settings(sharedSettings)
+  .settings(publishSettings)
+  .settings(testSettings)
+  .settings(scalafixSettings)
+  .settings(
     sbtPlugin := true,
     libraryDependencies ++= Seq(`swagger-parser`, swaggerCodegen),
-    scriptedLaunchOpts := { scriptedLaunchOpts.value ++
-      Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
+    scriptedLaunchOpts := {
+      scriptedLaunchOpts.value ++
+        Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
     },
     scriptedBufferLog := false
   )

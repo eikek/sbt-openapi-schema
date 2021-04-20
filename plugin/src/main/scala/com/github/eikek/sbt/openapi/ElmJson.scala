@@ -1,6 +1,6 @@
 package com.github.eikek.sbt.openapi
 
-import PartConv._
+import com.github.eikek.sbt.openapi.PartConv._
 
 trait ElmJson {
 
