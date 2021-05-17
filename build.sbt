@@ -1,7 +1,7 @@
 import Dependencies._
 import ReleaseTransformations._
 
-ThisBuild / scalaVersion := "2.12.13"
+ThisBuild / scalaVersion := "2.13.6"
 ThisBuild / versionScheme := Some("early-semver")
 
 addCommandAlias("ci", "; lint; test; scripted; publishLocal")
@@ -14,7 +14,7 @@ addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmt
 val sharedSettings = Seq(
   name := "sbt-openapi-schema",
   organization := "com.github.eikek",
-  scalaVersion := "2.12.13",
+  scalaVersion := "2.13.6",
   licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
   homepage := Some(url("https://github.com/eikek/sbt-openapi-schema")),
   Compile / console / scalacOptions := Seq(),
