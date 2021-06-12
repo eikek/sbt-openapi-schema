@@ -22,34 +22,6 @@ object CodegenSpec extends SimpleTestSuite {
     }
   }
 
-  test("Running java") {
-    val typeMapping: CustomMapping =
-      CustomMapping.forType {
-        case TypeDef(s, _) if s.startsWith("List<") =>
-          TypeDef(
-            s.replaceFirst("List", "PList"),
-            Imports("ch.bluecare.commons.data.PList")
-          )
-      }
-
-    val config = JavaConfig.default
-      .withJson(JavaJson.jackson)
-      .addMapping(typeMapping)
-      .addMapping(CustomMapping.forSource({ case s => s.copy(name = s.name + "Dto") }))
-      .addMapping(CustomMapping.forSource({ case s =>
-        s.addParents(Superclass("MyFunnyClass", Imports("org.myapp.MyFunnyclass"), false))
-      }))
-      .addBuilderParent(
-        Superclass("MyBuilderHelper", Imports("org.mylib.BuilderHelper"), true)
-      )
-
-    println("=========")
-    schema.values.foreach { sc =>
-      println("-------------------------------------------------")
-      println(JavaCode.generate(sc, Pkg("com.test"), config)._2)
-    }
-  }
-
   test("Running elm") {
     val config = ElmConfig.default
       .addMapping(CustomMapping.forName({ case name => name + "Dto" }))
