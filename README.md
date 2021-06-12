@@ -435,6 +435,32 @@ object PetDto {
 
 Unlike `allOf`, `oneOf` doesn't permit subschemas to inherit fields from their parent. This kind of relation fits well to algebraic data types encodings in Scala.
 
+## Static Documentation
+
+The plugin can run the [swagger codegen
+tool](https://github.com/swagger-api/swagger-codegen) or
+[redoc](https://github.com/Redocly/redoc) to produce a static HTML
+page of the OpenAPI specification file.
+
+Define which generator to use via:
+
+``` scala
+openapiStaticGen := OpenApiDocGenerator.Redoc //or
+openapiStaticGen := OpenApiDocGenerator.Swagger
+```
+
+Note that nodejs (the `npx` command) is required for redoc! The
+default is swagger.
+
+Then use the `openapiStaticDoc` task to generate the documentation
+from your openapi specification.
+
+
+Additionally, there is also a task that runs [`openapi-cli
+lint`](https://redoc.ly/docs/cli/) against your specification file.
+This also requires to have nodejs installed.
+
+
 ## TODOs
 
 - support validation
