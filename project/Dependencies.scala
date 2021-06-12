@@ -2,9 +2,9 @@ import sbt._
 
 object Dependencies {
 
-  val `swagger-parser` = "io.swagger.parser.v3" % "swagger-parser" % "2.0.25"
+  val `swagger-parser` = "io.swagger.parser.v3" % "swagger-parser" % "2.0.26"
 
-  val swaggerCodegen = "io.swagger.codegen.v3" % "swagger-codegen-cli" % "3.0.25"
+  val swaggerCodegen = "io.swagger.codegen.v3" % "swagger-codegen-cli" % "3.0.26"
 
   val slf4j = "org.slf4j" % "slf4j-api" % "1.7.26"
 

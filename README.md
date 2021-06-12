@@ -5,17 +5,15 @@
 [![License](https://img.shields.io/github/license/eikek/sbt-openapi-schema.svg?style=flat-square&color=steelblue)](https://github.com/eikek/sbt-openapi-schema/blob/master/LICENSE.txt)
 
 
-This is an sbt plugin to generate Scala, Java or Elm code given an
-openapi 3.x specification. Unlike other codegen tools, this focuses
-only on the `#/components/schema` section. Also, it generates
-immutable classes and optionally the corresponding JSON conversions.
+This is an sbt plugin to generate Scala or Elm code given an openapi
+3.x specification. Unlike other codegen tools, this focuses only on
+the `#/components/schema` section. Also, it generates immutable
+classes and optionally the corresponding JSON conversions.
 
 - Scala: `case class`es are generated and JSON conversion via circe.
-- Java: immutable classes (with builder pattern) are generated and
-  JSON conversion via jackson (requires jackson > 2.9).
-- Elm: (experimental) records are generated and constructors for
-  "empty" values. It works only for objects. JSON conversion is
-  generated using Elm's default encoding support and the
+- Elm: records are generated and constructors for "empty" values. It
+  works only for objects. JSON conversion is generated using Elm's
+  default encoding support and the
   [json-decode-pipeline](https://github.com/NoRedInk/elm-json-decode-pipeline)
   module for decoding.
 - JSON support is optional.
@@ -63,27 +61,25 @@ from the `compile` task.
 ## Configuration
 
 The configuration is specific to the target language. There exists a
-separate configuration object for Java, Scala and Elm.
+separate configuration object for Scala and Elm.
 
-The key `openapiJavaConfig` and `openapiScalaConfig` define some
-configuration to customize the code generation.
+The key `openapiScalaConfig` defines some configuration to customize
+the code generation.
 
-For Java, it looks like this:
+For Scala, it looks like this:
 ```scala
-case class JavaConfig(mapping: CustomMapping = CustomMapping.none
-  , json: JavaJson = JavaJson.none
-  , builderParents: List[Superclass] = Nil) {
+case class ScalaConfig(
+    mapping: CustomMapping = CustomMapping.none,
+    json: ScalaJson = ScalaJson.none
+) {
 
-  def withJson(json: JavaJson): JavaConfig =
+  def withJson(json: ScalaJson): ScalaConfig =
     copy(json = json)
 
-  def addBuilderParent(sc: Superclass): JavaConfig =
-    copy(builderParents = sc :: builderParents)
-
-  def addMapping(cm: CustomMapping): JavaConfig =
+  def addMapping(cm: CustomMapping): ScalaConfig =
     copy(mapping = mapping.andThen(cm))
 
-  def setMapping(cm: CustomMapping): JavaConfig =
+  def setMapping(cm: CustomMapping): ScalaConfig =
     copy(mapping = cm)
 }
 ```
@@ -92,12 +88,13 @@ By default, no JSON support is added to the generated classes. This
 can be changed via:
 
 ```
-openapiJavaConfig := JavaConfig.default.withJson(JavaJson.jackson)
+openapiScalaConfig := ScalaConfig().withJson(ScalaJson.circeSemiauto)
 ```
 
-This generates the required annotations for jackson. Note, that this
-plugin doesn't change your `libraryDependencies` setting. So you need
-to add the jackson dependency yourself.
+This generates the encoder and decoder using
+[circe](https://github.com/circe/circe). Note, that this plugin
+doesn't change your `libraryDependencies` setting. So you need to add
+the circe dependencies yourself.
 
 The `CustomMapping` class allows to change the class names or use
 different types (for example, you might want to change `LocalDate` to
@@ -129,22 +126,27 @@ file. Here is a `build.sbt` example snippet:
 ```scala
 import com.github.eikek.sbt.openapi._
 
+val CirceVersion            = "0.14.1"
 libraryDependencies ++= Seq(
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.8",
-  "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.8"
+  "io.circe" %% "circe-generic" % CirceVersion,
+  "io.circe" %% "circe-parser"  % CirceVersion
 )
 
 openapiSpec := (Compile/resourceDirectory).value/"test.yml"
-openapiTargetLanguage := Language.Java
-Compile/openapiJavaConfig := JavaConfig.default.
-  withJson(JavaJson.jackson).
-  addMapping(CustomMapping.forName({ case s => s + "Dto" }))
+openapiTargetLanguage := Language.Scala
+Compile/openapiScalaConfig := ScalaConfig()
+    .withJson(ScalaJson.circeSemiauto)
+    .addMapping(CustomMapping.forType({ case TypeDef("LocalDateTime", _) =>
+      TypeDef("Timestamp", Imports("com.mypackage.Timestamp"))
+    }))
+    .addMapping(CustomMapping.forName({ case s => s + "Dto" }))
 
 enablePlugins(OpenApiSchema)
 ```
 
-It adds jackson JSON support and changes the name of all classes by
-appending the suffix "Dto".
+It adds circe JSON support and changes the name of all classes by
+appending the suffix "Dto". It also changes the type used for local
+dates to be `com.mypackage.Timestamp`.
 
 
 ## Elm
@@ -193,12 +195,12 @@ list along with the main source dir. It may look something like this:
 
 It always generates type aliases for records.
 
-While source files for scala and java are added to sbt's
-`sourceGenerators` so that they get compiled with your sources, the
-elm source files are not added anywhere, because there is no support
-for Elm in sbt. However, in the `build.sbt` file, you can tell sbt to
-generate the files before compiling your elm app. This can be
-configured to run during resource generation. Example:
+While source files for scala are added to sbt's `sourceGenerators` so
+that they get compiled with your sources, the elm source files are not
+added anywhere, because there is no support for Elm in sbt. However,
+in the `build.sbt` file, you can tell sbt to generate the files before
+compiling your elm app. This can be configured to run during resource
+generation. Example:
 
 ``` scala
 
@@ -435,16 +437,32 @@ object PetDto {
 
 Unlike `allOf`, `oneOf` doesn't permit subschemas to inherit fields from their parent. This kind of relation fits well to algebraic data types encodings in Scala.
 
-## TODOs
+## Static Documentation
 
-- support validation
-  - openapi has several validation definitions
-  - (java) support bean validation
-- convert markdown description into html
-- add unit tests
-- add more integration tests
-  - see [Testing SBT Plugins](https://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins.html)
-  - see `plugin/src/sbt-test/*`
+The plugin can run the [swagger codegen
+tool](https://github.com/swagger-api/swagger-codegen) or
+[redoc](https://github.com/Redocly/redoc) to produce a static HTML
+page of the OpenAPI specification file.
+
+Define which generator to use via:
+
+``` scala
+openapiStaticGen := OpenApiDocGenerator.Redoc //or
+openapiStaticGen := OpenApiDocGenerator.Swagger
+```
+
+Note that nodejs (the `npx` command) is required for redoc! The
+default is swagger.
+
+Then use the `openapiStaticDoc` task to generate the documentation
+from your openapi specification.
+
+
+Additionally, there is also a task that runs [`openapi-cli
+lint`](https://redoc.ly/docs/cli/) against your specification file.
+This also requires to have nodejs installed.
+
+
 
 ## Credits
 
