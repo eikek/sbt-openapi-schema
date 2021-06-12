@@ -15,35 +15,40 @@ object OpenApiSchema extends AutoPlugin {
       def extension: String = productPrefix.toLowerCase
     }
     object Language {
-      case object Java  extends Language
       case object Scala extends Language
       case object Elm   extends Language
     }
 
+    sealed trait OpenApiDocGenerator {}
+    object OpenApiDocGenerator {
+      case object Swagger extends OpenApiDocGenerator
+      case object Redoc   extends OpenApiDocGenerator
+    }
+
     val openapiSpec    = settingKey[File]("The openapi specification")
     val openapiPackage = settingKey[Pkg]("The package to place the generated files into")
-    val openapiJavaConfig =
-      settingKey[JavaConfig]("Configuration for generating java files")
     val openapiScalaConfig =
       settingKey[ScalaConfig]("Configuration for generating scala files")
     val openapiElmConfig = settingKey[ElmConfig]("Configuration for generating elm files")
     val openapiTargetLanguage =
-      settingKey[Language]("The target language: either Language.Scala or Language.Java.")
+      settingKey[Language]("The target language: either Language.Scala or Language.Elm.")
     val openapiOutput    = settingKey[File]("The directory where files are generated")
     val openapiCodegen   = taskKey[Seq[File]]("Run the code generation")
     val openapiStaticDoc = taskKey[File]("Generate a static HTML documentation")
-    val openapiStaticArgs = settingKey[Seq[String]](
-      "Additional options to the command. In- and out-file are provided by the plugin. It is `-l html2' by default"
+    val openapiStaticGen = settingKey[OpenApiDocGenerator](
+      "The documentation generator to user. Possible values OpenApiDocGenerator.[Swagger,Redoc]. Default is Swagger, because Redoc requires Nodejs installed."
     )
     val openapiStaticOut =
       settingKey[File]("The target directory for static documentation")
+    val openapiLint = taskKey[Unit](
+      "Runs the redoc openapi-cli linter against the openapi spec. Requires nodejs installed"
+    )
   }
 
   import autoImport._
 
   val defaultSettings = Seq(
     openapiPackage := Pkg("org.myapi"),
-    openapiJavaConfig := JavaConfig(),
     openapiScalaConfig := ScalaConfig(),
     openapiElmConfig := ElmConfig(),
     openapiOutput := {
@@ -55,22 +60,26 @@ object OpenApiSchema extends AutoPlugin {
     openapiCodegen := {
       val out      = openapiOutput.value
       val logger   = streams.value.log
-      val cfgJava  = openapiJavaConfig.value
       val cfgScala = openapiScalaConfig.value
       val cfgElm   = openapiElmConfig.value
       val spec     = openapiSpec.value
       val pkg      = openapiPackage.value
       val lang     = openapiTargetLanguage.value
-      generateCode(logger, out, lang, cfgJava, cfgScala, cfgElm, spec, pkg)
+      generateCode(logger, out, lang, cfgScala, cfgElm, spec, pkg)
     },
     openapiStaticOut := (Compile / resourceManaged).value / "openapiDoc",
-    openapiStaticArgs := Seq("-l", "html2"),
+    openapiStaticGen := OpenApiDocGenerator.Swagger,
     openapiStaticDoc := {
       val logger = streams.value.log
       val out    = openapiStaticOut.value
       val spec   = openapiSpec.value
-      val args   = openapiStaticArgs.value
-      createOpenapiStaticDoc(logger, spec, args, out)
+      val gen    = openapiStaticGen.value
+      createOpenapiStaticDoc(logger, spec, gen, out)
+    },
+    openapiLint := {
+      val logger = streams.value.log
+      val spec   = openapiSpec.value
+      runOpenapiLinter(logger, spec)
     }
   )
 
@@ -86,7 +95,6 @@ object OpenApiSchema extends AutoPlugin {
       logger: Logger,
       out: File,
       lang: Language,
-      cfgJava: JavaConfig,
       cfgScala: ScalaConfig,
       cfgElm: ElmConfig,
       spec: File,
@@ -101,11 +109,9 @@ object OpenApiSchema extends AutoPlugin {
 
     val files = groupedSchemas.map { sc =>
       val (name, code) = (lang, sc) match {
-        case (Language.Scala, _) => ScalaCode.generate(sc, pkg, cfgScala)
-        case (Language.Java, _: SingularSchemaClass) =>
-          JavaCode.generate(sc, pkg, cfgJava)
+        case (Language.Scala, _)                    => ScalaCode.generate(sc, pkg, cfgScala)
         case (Language.Elm, _: SingularSchemaClass) => ElmCode.generate(sc, pkg, cfgElm)
-        case _                                      => sys.error(s"Java and Elm not yet supported for discriminants")
+        case _                                      => sys.error(s"Elm not yet supported for discriminants")
       }
       val file = targetPath / (name + "." + lang.extension)
       if (!file.exists || IO.read(file) != code) {
@@ -162,12 +168,35 @@ object OpenApiSchema extends AutoPlugin {
   def createOpenapiStaticDoc(
       logger: Logger,
       openapi: File,
-      args: Seq[String],
+      gen: OpenApiDocGenerator,
+      out: File
+  ): File =
+    gen match {
+      case OpenApiDocGenerator.Swagger =>
+        createOpenapiStaticDocSwagger(logger, openapi, out)
+      case OpenApiDocGenerator.Redoc =>
+        createOpenapiStaticDocRedoc(logger, openapi, out)
+    }
+
+  def createOpenapiStaticDocRedoc(logger: Logger, openapi: File, out: File): File = {
+    logger.info("Generating static documentation for openapi spec via redoc…")
+    val outFile = out / "index.html"
+    val cmd     = Seq("npx", "redoc-cli", "bundle", openapi.toString, "-o", outFile.toString)
+    Sys(logger).execSuccess(cmd)
+    if (!out.exists) {
+      sys.error("Generation did not produce a file")
+    }
+    outFile
+  }
+
+  def createOpenapiStaticDocSwagger(
+      logger: Logger,
+      openapi: File,
       out: File
   ): File = {
     val cl = Thread.currentThread.getContextClassLoader
     val command =
-      Seq("generate", "-i", openapi.toString) ++ args ++ Seq("-o", out.toString)
+      Seq("generate", "-i", openapi.toString, "-l", "html2", "-o", out.toString)
     logger.info(s"Creating static html rest documentation: ${command.toList}")
     IO.createDirectory(out)
     val file = out / "index.html"
@@ -189,6 +218,9 @@ object OpenApiSchema extends AutoPlugin {
     logger.info(s"Generated static file ${file}")
     file
   }
+
+  def runOpenapiLinter(logger: Logger, openapi: File): Unit =
+    Sys(logger).execSuccess(Seq("npx", "@redocly/openapi-cli", "lint", openapi.toString))
 
   final case class Stopwatch(start: Long) {
     def isBelow(fd: FiniteDuration): Boolean =
