@@ -20,6 +20,13 @@ object OpenApiSchema extends AutoPlugin {
       case object Elm   extends Language
     }
 
+    sealed trait OpenApiDocGenerator {
+    }
+    object OpenApiDocGenerator {
+      case object Swagger extends OpenApiDocGenerator
+      case object Redoc extends OpenApiDocGenerator
+    }
+
     val openapiSpec    = settingKey[File]("The openapi specification")
     val openapiPackage = settingKey[Pkg]("The package to place the generated files into")
     val openapiJavaConfig =
@@ -32,8 +39,8 @@ object OpenApiSchema extends AutoPlugin {
     val openapiOutput    = settingKey[File]("The directory where files are generated")
     val openapiCodegen   = taskKey[Seq[File]]("Run the code generation")
     val openapiStaticDoc = taskKey[File]("Generate a static HTML documentation")
-    val openapiStaticArgs = settingKey[Seq[String]](
-      "Additional options to the command. In- and out-file are provided by the plugin. It is `-l html2' by default"
+    val openapiStaticGen = settingKey[OpenApiDocGenerator](
+      "The documentation generator to user. Possible values OpenApiDocGenerator.[Swagger,Redoc]. Default is Swagger, because Redoc requires Nodejs installed."
     )
     val openapiStaticOut =
       settingKey[File]("The target directory for static documentation")
@@ -64,13 +71,13 @@ object OpenApiSchema extends AutoPlugin {
       generateCode(logger, out, lang, cfgJava, cfgScala, cfgElm, spec, pkg)
     },
     openapiStaticOut := (Compile / resourceManaged).value / "openapiDoc",
-    openapiStaticArgs := Seq("-l", "html2"),
+    openapiStaticGen := OpenApiDocGenerator.Swagger,
     openapiStaticDoc := {
       val logger = streams.value.log
       val out    = openapiStaticOut.value
       val spec   = openapiSpec.value
-      val args   = openapiStaticArgs.value
-      createOpenapiStaticDoc(logger, spec, args, out)
+      val gen   = openapiStaticGen.value
+      createOpenapiStaticDoc(logger, spec, gen, out)
     }
   )
 
@@ -159,15 +166,35 @@ object OpenApiSchema extends AutoPlugin {
     singularSchemas ++ discriminantSchemas
   }
 
-  def createOpenapiStaticDoc(
+
+  def createOpenapiStaticDoc(logger: Logger, openapi: File, gen: OpenApiDocGenerator, out: File): File =
+    gen match {
+      case OpenApiDocGenerator.Swagger =>
+        createOpenapiStaticDocSwagger(logger, openapi, out)
+      case OpenApiDocGenerator.Redoc =>
+        createOpenapiStaticDocRedoc(logger, openapi, out)
+    }
+
+
+  def createOpenapiStaticDocRedoc(logger: Logger, openapi: File, out:File): File = {
+    logger.info("Generating static documentation for openapi spec via redoc…")
+    val outFile = out / "index.html"
+    val cmd = Seq("npx", "redoc-cli", "bundle", openapi.toString, "-o", outFile.toString)
+    Sys.execSuccess(cmd)
+    if (!out.exists) {
+      sys.error("Generation did not produce a file")
+    }
+    outFile
+  }
+
+  def createOpenapiStaticDocSwagger(
       logger: Logger,
       openapi: File,
-      args: Seq[String],
       out: File
   ): File = {
     val cl = Thread.currentThread.getContextClassLoader
     val command =
-      Seq("generate", "-i", openapi.toString) ++ args ++ Seq("-o", out.toString)
+      Seq("generate", "-i", openapi.toString, "-l", "html2", "-o", out.toString)
     logger.info(s"Creating static html rest documentation: ${command.toList}")
     IO.createDirectory(out)
     val file = out / "index.html"
