@@ -20,11 +20,10 @@ object OpenApiSchema extends AutoPlugin {
       case object Elm   extends Language
     }
 
-    sealed trait OpenApiDocGenerator {
-    }
+    sealed trait OpenApiDocGenerator {}
     object OpenApiDocGenerator {
       case object Swagger extends OpenApiDocGenerator
-      case object Redoc extends OpenApiDocGenerator
+      case object Redoc   extends OpenApiDocGenerator
     }
 
     val openapiSpec    = settingKey[File]("The openapi specification")
@@ -44,6 +43,9 @@ object OpenApiSchema extends AutoPlugin {
     )
     val openapiStaticOut =
       settingKey[File]("The target directory for static documentation")
+    val openapiLint = taskKey[Unit](
+      "Runs the redoc openapi-cli linter against the openapi spec. Requires nodejs installed"
+    )
   }
 
   import autoImport._
@@ -76,8 +78,13 @@ object OpenApiSchema extends AutoPlugin {
       val logger = streams.value.log
       val out    = openapiStaticOut.value
       val spec   = openapiSpec.value
-      val gen   = openapiStaticGen.value
+      val gen    = openapiStaticGen.value
       createOpenapiStaticDoc(logger, spec, gen, out)
+    },
+    openapiLint := {
+      val logger = streams.value.log
+      val spec   = openapiSpec.value
+      runOpenapiLinter(logger, spec)
     }
   )
 
@@ -166,8 +173,12 @@ object OpenApiSchema extends AutoPlugin {
     singularSchemas ++ discriminantSchemas
   }
 
-
-  def createOpenapiStaticDoc(logger: Logger, openapi: File, gen: OpenApiDocGenerator, out: File): File =
+  def createOpenapiStaticDoc(
+      logger: Logger,
+      openapi: File,
+      gen: OpenApiDocGenerator,
+      out: File
+  ): File =
     gen match {
       case OpenApiDocGenerator.Swagger =>
         createOpenapiStaticDocSwagger(logger, openapi, out)
@@ -175,12 +186,11 @@ object OpenApiSchema extends AutoPlugin {
         createOpenapiStaticDocRedoc(logger, openapi, out)
     }
 
-
-  def createOpenapiStaticDocRedoc(logger: Logger, openapi: File, out:File): File = {
+  def createOpenapiStaticDocRedoc(logger: Logger, openapi: File, out: File): File = {
     logger.info("Generating static documentation for openapi spec via redoc…")
     val outFile = out / "index.html"
-    val cmd = Seq("npx", "redoc-cli", "bundle", openapi.toString, "-o", outFile.toString)
-    Sys.execSuccess(cmd)
+    val cmd     = Seq("npx", "redoc-cli", "bundle", openapi.toString, "-o", outFile.toString)
+    Sys(logger).execSuccess(cmd)
     if (!out.exists) {
       sys.error("Generation did not produce a file")
     }
@@ -216,6 +226,9 @@ object OpenApiSchema extends AutoPlugin {
     logger.info(s"Generated static file ${file}")
     file
   }
+
+  def runOpenapiLinter(logger: Logger, openapi: File): Unit =
+    Sys(logger).execSuccess(Seq("npx", "@redocly/openapi-cli", "lint", openapi.toString))
 
   final case class Stopwatch(start: Long) {
     def isBelow(fd: FiniteDuration): Boolean =
