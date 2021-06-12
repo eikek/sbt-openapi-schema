@@ -15,7 +15,6 @@ object OpenApiSchema extends AutoPlugin {
       def extension: String = productPrefix.toLowerCase
     }
     object Language {
-      case object Java  extends Language
       case object Scala extends Language
       case object Elm   extends Language
     }
@@ -28,13 +27,11 @@ object OpenApiSchema extends AutoPlugin {
 
     val openapiSpec    = settingKey[File]("The openapi specification")
     val openapiPackage = settingKey[Pkg]("The package to place the generated files into")
-    val openapiJavaConfig =
-      settingKey[JavaConfig]("Configuration for generating java files")
     val openapiScalaConfig =
       settingKey[ScalaConfig]("Configuration for generating scala files")
     val openapiElmConfig = settingKey[ElmConfig]("Configuration for generating elm files")
     val openapiTargetLanguage =
-      settingKey[Language]("The target language: either Language.Scala or Language.Java.")
+      settingKey[Language]("The target language: either Language.Scala or Language.Elm.")
     val openapiOutput    = settingKey[File]("The directory where files are generated")
     val openapiCodegen   = taskKey[Seq[File]]("Run the code generation")
     val openapiStaticDoc = taskKey[File]("Generate a static HTML documentation")
@@ -52,7 +49,6 @@ object OpenApiSchema extends AutoPlugin {
 
   val defaultSettings = Seq(
     openapiPackage := Pkg("org.myapi"),
-    openapiJavaConfig := JavaConfig(),
     openapiScalaConfig := ScalaConfig(),
     openapiElmConfig := ElmConfig(),
     openapiOutput := {
@@ -64,13 +60,12 @@ object OpenApiSchema extends AutoPlugin {
     openapiCodegen := {
       val out      = openapiOutput.value
       val logger   = streams.value.log
-      val cfgJava  = openapiJavaConfig.value
       val cfgScala = openapiScalaConfig.value
       val cfgElm   = openapiElmConfig.value
       val spec     = openapiSpec.value
       val pkg      = openapiPackage.value
       val lang     = openapiTargetLanguage.value
-      generateCode(logger, out, lang, cfgJava, cfgScala, cfgElm, spec, pkg)
+      generateCode(logger, out, lang, cfgScala, cfgElm, spec, pkg)
     },
     openapiStaticOut := (Compile / resourceManaged).value / "openapiDoc",
     openapiStaticGen := OpenApiDocGenerator.Swagger,
@@ -100,7 +95,6 @@ object OpenApiSchema extends AutoPlugin {
       logger: Logger,
       out: File,
       lang: Language,
-      cfgJava: JavaConfig,
       cfgScala: ScalaConfig,
       cfgElm: ElmConfig,
       spec: File,
@@ -115,11 +109,9 @@ object OpenApiSchema extends AutoPlugin {
 
     val files = groupedSchemas.map { sc =>
       val (name, code) = (lang, sc) match {
-        case (Language.Scala, _) => ScalaCode.generate(sc, pkg, cfgScala)
-        case (Language.Java, _: SingularSchemaClass) =>
-          JavaCode.generate(sc, pkg, cfgJava)
+        case (Language.Scala, _)                    => ScalaCode.generate(sc, pkg, cfgScala)
         case (Language.Elm, _: SingularSchemaClass) => ElmCode.generate(sc, pkg, cfgElm)
-        case _                                      => sys.error(s"Java and Elm not yet supported for discriminants")
+        case _                                      => sys.error(s"Elm not yet supported for discriminants")
       }
       val file = targetPath / (name + "." + lang.extension)
       if (!file.exists || IO.read(file) != code) {
