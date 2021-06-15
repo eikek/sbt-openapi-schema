@@ -65,6 +65,7 @@ object SchemaClass {
       internalSchemas = internalSchemas
     ).modify(cm.changeSource)
       .modify(s => s.addImports(Imports.flatten(s.parents.map(_.imports))))
+      .modify(s => s.addImports(Imports.flatten(s.internalSchemas.map(_.imports))))
       .modify(resolveFieldImports)
   }
 
