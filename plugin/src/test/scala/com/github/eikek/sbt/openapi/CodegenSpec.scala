@@ -11,9 +11,9 @@ object CodegenSpec extends SimpleTestSuite {
   test("Running scala") {
     val config = ScalaConfig.default
       .withJson(ScalaJson.circeSemiauto)
-      .addMapping(CustomMapping.forSource({ case s =>
+      .addMapping(CustomMapping.forSource { case s =>
         s.addParents(Superclass("MyTrait", Imports.empty, false))
-      }))
+      })
 
     println("=========")
     schema.values.foreach { sc =>
@@ -24,7 +24,7 @@ object CodegenSpec extends SimpleTestSuite {
 
   test("Running elm") {
     val config = ElmConfig.default
-      .addMapping(CustomMapping.forName({ case name => name + "Dto" }))
+      .addMapping(CustomMapping.forName { case name => name + "Dto" })
       .withJson(ElmJson.decodePipeline)
 
     println("=========")

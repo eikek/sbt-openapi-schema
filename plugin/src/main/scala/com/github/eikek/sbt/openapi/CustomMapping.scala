@@ -58,17 +58,17 @@ object CustomMapping {
         case _ => field
       }
 
-    forSource({ case s =>
+    forSource { case s =>
       s.copy(name = f.lift(s.name).getOrElse(s.name))
         .copy(fields = s.fields.map(changeRef))
-    })
+    }
   }
 
   def forField(f: PartialFunction[Field, Field]): CustomMapping =
-    forSource({ case s =>
+    forSource { case s =>
       val newFields = s.fields.map(field => f.lift(field).getOrElse(field))
       s.copy(fields = newFields)
-    })
+    }
 
   def forFormatType(f: PartialFunction[String, Field => Field]): CustomMapping =
     forField {

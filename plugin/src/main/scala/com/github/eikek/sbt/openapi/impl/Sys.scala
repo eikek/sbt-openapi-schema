@@ -24,7 +24,7 @@ object Sys {
         case 0 => ()
         case n =>
           val cmdStr = cmd.mkString(" ")
-          sys.error(s"Command '${cmdStr}' finished with error: $n")
+          sys.error(s"Command '$cmdStr' finished with error: $n")
       }
   }
 
