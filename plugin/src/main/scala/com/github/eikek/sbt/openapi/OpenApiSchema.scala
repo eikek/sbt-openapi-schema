@@ -48,9 +48,9 @@ object OpenApiSchema extends AutoPlugin {
   import autoImport._
 
   val defaultSettings = Seq(
-    openapiPackage := Pkg("org.myapi"),
+    openapiPackage     := Pkg("org.myapi"),
     openapiScalaConfig := ScalaConfig(),
-    openapiElmConfig := ElmConfig(),
+    openapiElmConfig   := ElmConfig(),
     openapiOutput := {
       openapiTargetLanguage.value match {
         case Language.Elm => (Compile / target).value / "elm-src"
@@ -109,9 +109,9 @@ object OpenApiSchema extends AutoPlugin {
 
     val files = groupedSchemas.map { sc =>
       val (name, code) = (lang, sc) match {
-        case (Language.Scala, _)                    => ScalaCode.generate(sc, pkg, cfgScala)
+        case (Language.Scala, _) => ScalaCode.generate(sc, pkg, cfgScala)
         case (Language.Elm, _: SingularSchemaClass) => ElmCode.generate(sc, pkg, cfgElm)
-        case _                                      => sys.error(s"Elm not yet supported for discriminants")
+        case _ => sys.error(s"Elm not yet supported for discriminants")
       }
       val file = targetPath / (name + "." + lang.extension)
       if (!file.exists || IO.read(file) != code) {
@@ -181,7 +181,7 @@ object OpenApiSchema extends AutoPlugin {
   def createOpenapiStaticDocRedoc(logger: Logger, openapi: File, out: File): File = {
     logger.info("Generating static documentation for openapi spec via redoc…")
     val outFile = out / "index.html"
-    val cmd     = Seq("npx", "redoc-cli", "bundle", openapi.toString, "-o", outFile.toString)
+    val cmd = Seq("npx", "redoc-cli", "bundle", openapi.toString, "-o", outFile.toString)
     Sys(logger).execSuccess(cmd)
     if (!out.exists) {
       sys.error("Generation did not produce a file")
@@ -215,7 +215,7 @@ object OpenApiSchema extends AutoPlugin {
         s"Documentation generation failed. No file produced. '$file' doesn't exist."
       )
     }
-    logger.info(s"Generated static file ${file}")
+    logger.info(s"Generated static file $file")
     file
   }
 

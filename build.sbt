@@ -1,7 +1,7 @@
 import Dependencies._
 import ReleaseTransformations._
 
-ThisBuild / scalaVersion := "2.13.6"
+ThisBuild / scalaVersion  := "2.12.14"
 ThisBuild / versionScheme := Some("early-semver")
 
 addCommandAlias("ci", "; lint; test; scripted; publishLocal")
@@ -12,11 +12,11 @@ addCommandAlias(
 addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmtAll")
 
 val sharedSettings = Seq(
-  name := "sbt-openapi-schema",
+  name         := "sbt-openapi-schema",
   organization := "com.github.eikek",
-  scalaVersion := "2.13.6",
-  licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
-  homepage := Some(url("https://github.com/eikek/sbt-openapi-schema")),
+  scalaVersion := "2.12.14",
+  licenses     := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
+  homepage     := Some(url("https://github.com/eikek/sbt-openapi-schema")),
   Compile / console / scalacOptions := Seq(),
   scalacOptions ++= Seq(
     "-encoding",
@@ -50,9 +50,9 @@ lazy val publishSettings = Seq(
       email = ""
     )
   ),
-  homepage := Some(url("https://github.com/eikek/sbt-openapi-schema")),
+  homepage               := Some(url("https://github.com/eikek/sbt-openapi-schema")),
   Test / publishArtifact := false,
-  releaseCrossBuild := false,
+  releaseCrossBuild      := false,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,
@@ -70,8 +70,8 @@ lazy val publishSettings = Seq(
 )
 
 lazy val noPublish = Seq(
-  publish := {},
-  publishLocal := {},
+  publish         := {},
+  publishLocal    := {},
   publishArtifact := false
 )
 

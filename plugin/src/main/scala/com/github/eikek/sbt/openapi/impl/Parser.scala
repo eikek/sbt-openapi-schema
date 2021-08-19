@@ -15,9 +15,9 @@ object Parser {
     // http://javadoc.io/doc/io.swagger.parser.v3/swagger-parser-v3/2.0.9
     val oapi = parser.read(file)
 
-    oapi.getComponents.getSchemas.asScala.toMap.map({ case (name, schema) =>
+    oapi.getComponents.getSchemas.asScala.toMap.map { case (name, schema) =>
       name -> makeSchemaClass(name, schema)
-    })
+    }
   }
 
   def makeSchemaClass(name: String, schema: Schema[_]): SingularSchemaClass =
@@ -38,9 +38,9 @@ object Parser {
             case s if s.getProperties != null =>
               val required =
                 Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
-              s.getProperties.asScala
-                .map({ case (n, ps) => makeProperty(n, ps, required, None) })
-                .toList
+              s.getProperties.asScala.map { case (n, ps) =>
+                makeProperty(n, ps, required, None)
+              }.toList
           }
           .flatten
           .toList
@@ -73,11 +73,11 @@ object Parser {
           oneOfRef = oneOfFields
         )
       case s if s.getProperties != null =>
-        val required          = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
+        val required = Option(s.getRequired).map(_.asScala.toSet).getOrElse(Set.empty)
         val discriminatorName = Option(s.getDiscriminator).map(_.getPropertyName)
-        val props = s.getProperties.asScala
-          .map({ case (n, ps) => makeProperty(n, ps, required, discriminatorName) })
-          .toList
+        val props = s.getProperties.asScala.map { case (n, ps) =>
+          makeProperty(n, ps, required, discriminatorName)
+        }.toList
         SingularSchemaClass(name, props, Doc(s.getDescription.nullToEmpty))
       case _ =>
         val discriminatorName = Option(schema.getDiscriminator).map(_.getPropertyName)
