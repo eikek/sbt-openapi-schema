@@ -77,7 +77,7 @@ object ElmJson {
         }
         if (field.nullablePrimitive) {
           if (dir == Direction.Dec)
-            Part.concat(Part(s"(${dir.name}.maybe "), codec, Part(")"))
+            Part.concat(Part(s"(${dir.name}.maybe "), codec, Part(")")) ~ Part("Nothing")
           else
             Part.concat(
               Part("(Maybe.map "),
@@ -89,8 +89,14 @@ object ElmJson {
         }
     }
 
+    private val requiredOrOptional: PartConv[(Pkg, Field)] =
+      PartConv { case (_, field) =>
+        if (field.nullablePrimitive) Part("P.optional")
+        else Part("P.required")
+      }
+
     private val decodeField: PartConv[(Pkg, Field)] =
-      constant("|>").map(_.indent(4)) ~ constant("P.required") ~
+      constant("|>").map(_.indent(4)) ~ requiredOrOptional ~
         fieldName.contramap[(Pkg, Field)](_._2).map(_.quoted) ~ codecForField(
           Direction.Dec
         )
