@@ -1,6 +1,6 @@
 addSbtPlugin("ch.epfl.scala"    % "sbt-scalafix"   % "0.9.31")
 addSbtPlugin("com.eed3si9n"     % "sbt-buildinfo"  % "0.10.0")
-addSbtPlugin("com.geirsson"     % "sbt-ci-release" % "1.5.7")
+addSbtPlugin("com.github.sbt"   % "sbt-ci-release" % "1.5.9")
 addSbtPlugin("com.github.sbt"   % "sbt-pgp"        % "2.1.2")
 addSbtPlugin("com.github.sbt"   % "sbt-release"    % "1.1.0")
 addSbtPlugin("com.typesafe.sbt" % "sbt-git"        % "1.0.1")
