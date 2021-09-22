@@ -5,7 +5,7 @@ import minitest._
 
 object CodegenSpec extends SimpleTestSuite {
 
-  val test1  = getClass.getResource("/test1.yml")
+  val test1 = getClass.getResource("/test1.yml")
   val schema = Parser.parse(test1.toString)
 
   test("Running scala") {

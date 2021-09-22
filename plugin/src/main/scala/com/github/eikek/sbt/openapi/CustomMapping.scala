@@ -22,7 +22,7 @@ object CustomMapping {
       sf: PartialFunction[SourceFile, SourceFile]
   ): CustomMapping =
     new CustomMapping {
-      def changeType(td: TypeDef)       = tf.lift(td).getOrElse(td)
+      def changeType(td: TypeDef) = tf.lift(td).getOrElse(td)
       def changeSource(src: SourceFile) = sf.lift(src).getOrElse(src)
     }
 

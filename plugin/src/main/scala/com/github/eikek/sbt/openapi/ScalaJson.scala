@@ -12,7 +12,7 @@ trait ScalaJson {
 
 object ScalaJson {
   val none = new ScalaJson {
-    def companion                            = PartConv(_ => Part.empty)
+    def companion = PartConv(_ => Part.empty)
     def resolve(src: SourceFile): SourceFile = src
   }
 

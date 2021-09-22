@@ -6,15 +6,15 @@ import com.github.eikek.sbt.openapi._
 object ScalaCode {
   val primitiveTypeMapping: TypeMapping =
     TypeMapping(
-      Type.Bool    -> TypeDef("Boolean", Imports.empty),
-      Type.String  -> TypeDef("String", Imports.empty),
-      Type.Int32   -> TypeDef("Int", Imports.empty),
-      Type.Int64   -> TypeDef("Long", Imports.empty),
+      Type.Bool -> TypeDef("Boolean", Imports.empty),
+      Type.String -> TypeDef("String", Imports.empty),
+      Type.Int32 -> TypeDef("Int", Imports.empty),
+      Type.Int64 -> TypeDef("Long", Imports.empty),
       Type.Float32 -> TypeDef("Float", Imports.empty),
       Type.Float64 -> TypeDef("Double", Imports.empty),
-      Type.Uuid    -> TypeDef("UUID", Imports("java.util.UUID")),
-      Type.Url     -> TypeDef("URL", Imports("java.net.URL")),
-      Type.Uri     -> TypeDef("URI", Imports("java.net.URI")),
+      Type.Uuid -> TypeDef("UUID", Imports("java.util.UUID")),
+      Type.Url -> TypeDef("URL", Imports("java.net.URL")),
+      Type.Uri -> TypeDef("URI", Imports("java.net.URI")),
       Type.Date(Type.TimeRepr.String) -> TypeDef(
         "LocalDate",
         Imports("java.time.LocalDate")
@@ -136,11 +136,11 @@ object ScalaCode {
   def generate(sc: SchemaClass, pkg: Pkg, cfg: ScalaConfig): (String, String) =
     sc match {
       case ssc: SingularSchemaClass =>
-        val src  = resolveSchema(sc, cfg.mapping).copy(pkg = pkg).modify(cfg.json.resolve)
+        val src = resolveSchema(sc, cfg.mapping).copy(pkg = pkg).modify(cfg.json.resolve)
         val conv = fileHeader ++ caseClass ++ cfg.json.companion
         (src.name, conv.toPart(src).render)
       case dsc: DiscriminantSchemaClass =>
-        val src  = resolveSchema(sc, cfg.mapping).copy(pkg = pkg).modify(cfg.json.resolve)
+        val src = resolveSchema(sc, cfg.mapping).copy(pkg = pkg).modify(cfg.json.resolve)
         val conv = fileHeader ++ sealedTrait ++ enclosingObject(src.name, cfg)
         (src.name, conv.toPart(src).render)
     }
