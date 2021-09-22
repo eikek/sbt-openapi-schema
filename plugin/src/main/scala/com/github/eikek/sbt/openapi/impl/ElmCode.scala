@@ -15,17 +15,17 @@ object ElmCode {
 
   val primitiveTypeMapping: TypeMapping =
     TypeMapping(
-      Type.Bool                           -> TypeDef("Bool", Imports.empty),
-      Type.String                         -> TypeDef("String", Imports.empty),
-      Type.Int32                          -> TypeDef("Int", Imports.empty),
-      Type.Int64                          -> TypeDef("Int", Imports.empty),
-      Type.Float32                        -> TypeDef("Float", Imports.empty),
-      Type.Float64                        -> TypeDef("Float", Imports.empty),
-      Type.Uuid                           -> TypeDef("String", Imports.empty),
-      Type.Url                            -> TypeDef("String", Imports.empty),
-      Type.Uri                            -> TypeDef("String", Imports.empty),
-      Type.Date(Type.TimeRepr.String)     -> TypeDef("String", Imports.empty),
-      Type.Date(Type.TimeRepr.Number)     -> TypeDef("Int", Imports.empty),
+      Type.Bool -> TypeDef("Bool", Imports.empty),
+      Type.String -> TypeDef("String", Imports.empty),
+      Type.Int32 -> TypeDef("Int", Imports.empty),
+      Type.Int64 -> TypeDef("Int", Imports.empty),
+      Type.Float32 -> TypeDef("Float", Imports.empty),
+      Type.Float64 -> TypeDef("Float", Imports.empty),
+      Type.Uuid -> TypeDef("String", Imports.empty),
+      Type.Url -> TypeDef("String", Imports.empty),
+      Type.Uri -> TypeDef("String", Imports.empty),
+      Type.Date(Type.TimeRepr.String) -> TypeDef("String", Imports.empty),
+      Type.Date(Type.TimeRepr.Number) -> TypeDef("Int", Imports.empty),
       Type.DateTime(Type.TimeRepr.String) -> TypeDef("String", Imports.empty),
       Type.DateTime(Type.TimeRepr.Number) -> TypeDef("Int", Imports.empty)
     )
@@ -55,7 +55,7 @@ object ElmCode {
         TypeDef(s"(Dict ${k.name},${v.name})", k.imports ++ v.imports ++ Imports("Dict"))
       )
     case Type.Ref(name) =>
-      val srcRef  = SingularSchemaClass(name)
+      val srcRef = SingularSchemaClass(name)
       val refName = resolveSchema(srcRef, cm, pkg).name
       Some(TypeDef(refName, Imports(s"${pkg.name}.$refName exposing ($refName)")))
     case t =>

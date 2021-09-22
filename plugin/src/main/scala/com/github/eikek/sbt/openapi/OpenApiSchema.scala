@@ -16,24 +16,24 @@ object OpenApiSchema extends AutoPlugin {
     }
     object Language {
       case object Scala extends Language
-      case object Elm   extends Language
+      case object Elm extends Language
     }
 
     sealed trait OpenApiDocGenerator {}
     object OpenApiDocGenerator {
       case object Swagger extends OpenApiDocGenerator
-      case object Redoc   extends OpenApiDocGenerator
+      case object Redoc extends OpenApiDocGenerator
     }
 
-    val openapiSpec    = settingKey[File]("The openapi specification")
+    val openapiSpec = settingKey[File]("The openapi specification")
     val openapiPackage = settingKey[Pkg]("The package to place the generated files into")
     val openapiScalaConfig =
       settingKey[ScalaConfig]("Configuration for generating scala files")
     val openapiElmConfig = settingKey[ElmConfig]("Configuration for generating elm files")
     val openapiTargetLanguage =
       settingKey[Language]("The target language: either Language.Scala or Language.Elm.")
-    val openapiOutput    = settingKey[File]("The directory where files are generated")
-    val openapiCodegen   = taskKey[Seq[File]]("Run the code generation")
+    val openapiOutput = settingKey[File]("The directory where files are generated")
+    val openapiCodegen = taskKey[Seq[File]]("Run the code generation")
     val openapiStaticDoc = taskKey[File]("Generate a static HTML documentation")
     val openapiStaticGen = settingKey[OpenApiDocGenerator](
       "The documentation generator to user. Possible values OpenApiDocGenerator.[Swagger,Redoc]. Default is Swagger, because Redoc requires Nodejs installed."
@@ -48,9 +48,9 @@ object OpenApiSchema extends AutoPlugin {
   import autoImport._
 
   val defaultSettings = Seq(
-    openapiPackage     := Pkg("org.myapi"),
+    openapiPackage := Pkg("org.myapi"),
     openapiScalaConfig := ScalaConfig(),
-    openapiElmConfig   := ElmConfig(),
+    openapiElmConfig := ElmConfig(),
     openapiOutput := {
       openapiTargetLanguage.value match {
         case Language.Elm => (Compile / target).value / "elm-src"
@@ -58,27 +58,27 @@ object OpenApiSchema extends AutoPlugin {
       }
     },
     openapiCodegen := {
-      val out      = openapiOutput.value
-      val logger   = streams.value.log
+      val out = openapiOutput.value
+      val logger = streams.value.log
       val cfgScala = openapiScalaConfig.value
-      val cfgElm   = openapiElmConfig.value
-      val spec     = openapiSpec.value
-      val pkg      = openapiPackage.value
-      val lang     = openapiTargetLanguage.value
+      val cfgElm = openapiElmConfig.value
+      val spec = openapiSpec.value
+      val pkg = openapiPackage.value
+      val lang = openapiTargetLanguage.value
       generateCode(logger, out, lang, cfgScala, cfgElm, spec, pkg)
     },
     openapiStaticOut := (Compile / resourceManaged).value / "openapiDoc",
     openapiStaticGen := OpenApiDocGenerator.Swagger,
     openapiStaticDoc := {
       val logger = streams.value.log
-      val out    = openapiStaticOut.value
-      val spec   = openapiSpec.value
-      val gen    = openapiStaticGen.value
+      val out = openapiStaticOut.value
+      val spec = openapiSpec.value
+      val gen = openapiStaticGen.value
       createOpenapiStaticDoc(logger, spec, gen, out)
     },
     openapiLint := {
       val logger = streams.value.log
-      val spec   = openapiSpec.value
+      val spec = openapiSpec.value
       runOpenapiLinter(logger, spec)
     }
   )
@@ -105,7 +105,7 @@ object OpenApiSchema extends AutoPlugin {
     IO.createDirectories(Seq(targetPath))
 
     val schemas: Seq[SingularSchemaClass] = Parser.parse(spec.toString).values.toList
-    val groupedSchemas                    = groupDiscriminantSchemas(schemas)
+    val groupedSchemas = groupDiscriminantSchemas(schemas)
 
     val files = groupedSchemas.map { sc =>
       val (name, code) = (lang, sc) match {

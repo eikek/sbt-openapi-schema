@@ -6,7 +6,7 @@ import minitest.SimpleTestSuite
 object ParserSpec extends SimpleTestSuite {
 
   test("Parsing out properties from discriminator schema") {
-    val test1  = getClass.getResource("/test1.yml")
+    val test1 = getClass.getResource("/test1.yml")
     val schema = Parser.parse(test1.toString)
 
     val actual = schema("DiscriminatorObject")
@@ -26,7 +26,7 @@ object ParserSpec extends SimpleTestSuite {
   }
 
   test("Parsing out properties from composed schema with discriminator") {
-    val test1  = getClass.getResource("/test1.yml")
+    val test1 = getClass.getResource("/test1.yml")
     val schema = Parser.parse(test1.toString)
 
     val actual = schema("FirstDiscriminatorSubObject")
@@ -46,7 +46,7 @@ object ParserSpec extends SimpleTestSuite {
   test(
     "Parsing out properties from composed schema with discriminator (different order)"
   ) {
-    val test1  = getClass.getResource("/test1.yml")
+    val test1 = getClass.getResource("/test1.yml")
     val schema = Parser.parse(test1.toString)
 
     val actual = schema("SecondDiscriminatorObject")
@@ -65,7 +65,7 @@ object ParserSpec extends SimpleTestSuite {
   }
 
   test("Parsing out properties from flat schema") {
-    val test1  = getClass.getResource("/test1.yml")
+    val test1 = getClass.getResource("/test1.yml")
     val schema = Parser.parse(test1.toString)
 
     val actual = schema("Room")
