@@ -52,7 +52,7 @@ object Main {
 
   def testJson[A](a: A)(implicit d: Decoder[A], e: Encoder[A]): Unit = {
     val jsonStr = toJson(a)
-    val backA   = toValue(jsonStr)
+    val backA = toValue(jsonStr)
     println(s"JSON: $jsonStr  BACK: $backA")
     assert(backA == a)
   }
