@@ -107,7 +107,7 @@ object Parser {
     p
   }
 
-  //TODO missing: BinarySchema, ByteArraySchema, FileSchema, MapSchema
+  // TODO missing: BinarySchema, ByteArraySchema, FileSchema, MapSchema
   def schemaType(sch: Schema[_]): Type =
     sch match {
       case s: ArraySchema =>
