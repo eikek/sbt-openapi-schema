@@ -8,7 +8,7 @@ object Dependencies {
 
   val slf4j = "org.slf4j" % "slf4j-api" % "1.7.26"
 
-  val `logback-classic` = "ch.qos.logback" % "logback-classic" % "1.2.7"
+  val `logback-classic` = "ch.qos.logback" % "logback-classic" % "1.2.8"
 
   // https://github.com/monix/minitest
   // Apache 2.0
