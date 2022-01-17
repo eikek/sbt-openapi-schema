@@ -71,10 +71,21 @@ object CustomMapping {
     }
 
   def forFormatType(f: PartialFunction[String, Field => Field]): CustomMapping =
-    forField {
-      case field if f.isDefinedAt(field.prop.format.getOrElse("")) =>
-        f(field.prop.format.getOrElse(""))(field)
-    }
+    forField(Function.unlift { field =>
+      (field.prop.format, field.prop.paramFormat) match {
+        case (Some(ff), None) if f.isDefinedAt(ff) =>
+          Some(f(ff)(field))
+        case (None, Some(pf)) if f.isDefinedAt(pf) =>
+          val default = f(pf)(field)
+          Some(
+            default.copy(typeDef =
+              TypeDef(s"List[${default.typeDef.name}]", default.typeDef.imports)
+            )
+          )
+        case _ =>
+          None
+      }
+    })
 
   val none = apply(PartialFunction.empty, PartialFunction.empty)
 }

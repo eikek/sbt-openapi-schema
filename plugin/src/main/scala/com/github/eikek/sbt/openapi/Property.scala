@@ -5,6 +5,7 @@ case class Property(
     `type`: Type,
     nullable: Boolean = false,
     format: Option[String] = None,
+    paramFormat: Option[String] = None,
     pattern: Option[String] = None,
     doc: Doc = Doc.empty,
     discriminator: Boolean = false

@@ -7,7 +7,11 @@ scalaVersion := "2.12.15"
 enablePlugins(OpenApiSchema)
 openapiTargetLanguage := Language.Scala
 openapiSpec := (Compile / resourceDirectory).value / "test.yml"
-openapiScalaConfig := ScalaConfig.default.addMapping(CustomMapping.forType {
-  case TypeDef("LocalDate", _) =>
-    TypeDef("Instant", Imports("java.time.Instant"))
-})
+openapiScalaConfig :=
+  ScalaConfig.default
+    .addMapping(CustomMapping.forFormatType { case "ident" =>
+      field => field.copy(typeDef = TypeDef("Ident", Imports("org.myapp.Ident")))
+    })
+    .addMapping(CustomMapping.forType { case TypeDef("LocalDate", _) =>
+      TypeDef("Instant", Imports("java.time.Instant"))
+    })

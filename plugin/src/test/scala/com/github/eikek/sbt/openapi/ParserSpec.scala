@@ -18,9 +18,18 @@ object ParserSpec extends SimpleTestSuite {
     assertEquals(
       propsWithNoDocs,
       Set(
-        Property("type", Type.String, false, None, None, Doc.empty, true),
-        Property("sharedString", Type.String, true, None, None, Doc.empty, false),
-        Property("anotherSharedBoolean", Type.Bool, false, None, None, Doc.empty, false)
+        Property("type", Type.String, false, None, None, None, Doc.empty, true),
+        Property("sharedString", Type.String, true, None, None, None, Doc.empty, false),
+        Property(
+          "anotherSharedBoolean",
+          Type.Bool,
+          false,
+          None,
+          None,
+          None,
+          Doc.empty,
+          false
+        )
       )
     )
   }
@@ -38,7 +47,7 @@ object ParserSpec extends SimpleTestSuite {
     assertEquals(
       propsWithNoDocs,
       Set(
-        Property("uniqueString", Type.String, true, None, None, Doc.empty, false)
+        Property("uniqueString", Type.String, true, None, None, None, Doc.empty, false)
       )
     )
   }
@@ -58,7 +67,7 @@ object ParserSpec extends SimpleTestSuite {
     assertEquals(
       propsWithNoDocs,
       Set(
-        Property("uniqueInteger", Type.Int32, false, None, None, Doc.empty, false),
+        Property("uniqueInteger", Type.Int32, false, None, None, None, Doc.empty, false),
         Property("otherUniqueBoolean", Type.Bool, true)
       )
     )
@@ -77,8 +86,8 @@ object ParserSpec extends SimpleTestSuite {
     assertEquals(
       propsWithNoDocs,
       Set(
-        Property("name", Type.String, false, None, None, Doc.empty, false),
-        Property("seats", Type.Int32, true, Some("int32"), None, Doc.empty, false)
+        Property("name", Type.String, false, None, None, None, Doc.empty, false),
+        Property("seats", Type.Int32, true, Some("int32"), None, None, Doc.empty, false)
       )
     )
   }
