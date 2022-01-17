@@ -31,9 +31,9 @@ object Sys {
   final private class Output(logger: Logger) extends ProcessLogger {
     def buffer[T](f: => T): T = f
     def err(s: => String): Unit =
-      logger.error(s)
+      logger.info(s"[stderr] $s")
 
     def out(s: => String): Unit =
-      logger.info(s)
+      logger.info(s"[stdout] $s")
   }
 }

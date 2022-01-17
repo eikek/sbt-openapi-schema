@@ -18,6 +18,22 @@ paths:
 
 components:
   schemas:
+    Mapper:
+      required:
+        - id
+        - secondary
+      properties:
+        id:
+          type: string
+          format: ident
+        secondary:
+          type: array
+          items:
+            type: string
+            format: ident
+        fallback:
+          type: string
+          format: ident
     Room:
       description: |
         A room with some properties.

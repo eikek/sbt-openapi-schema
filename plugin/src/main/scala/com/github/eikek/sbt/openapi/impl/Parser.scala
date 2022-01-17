@@ -99,6 +99,7 @@ object Parser {
       name,
       schemaType(schema),
       format = schema.getFormat.asNonEmpty,
+      paramFormat = paramSchemaFormat(schema),
       pattern = schema.getPattern.asNonEmpty,
       nullable = schema.getNullable == true || !required(name),
       doc = Doc(schema.getDescription.nullToEmpty),
@@ -106,6 +107,14 @@ object Parser {
     )
     p
   }
+
+  def paramSchemaFormat(sch: Schema[_]): Option[String] =
+    sch match {
+      case s: ArraySchema =>
+        Option(s.getItems()).flatMap(_.getFormat().asNonEmpty)
+      case _ =>
+        None
+    }
 
   // TODO missing: BinarySchema, ByteArraySchema, FileSchema, MapSchema
   def schemaType(sch: Schema[_]): Type =

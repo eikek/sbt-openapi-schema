@@ -11,6 +11,9 @@ object CodegenSpec extends SimpleTestSuite {
   test("Running scala") {
     val config = ScalaConfig.default
       .withJson(ScalaJson.circeSemiauto)
+      .addMapping(CustomMapping.forFormatType { case "ident" =>
+        field => field.copy(typeDef = TypeDef("Ident", Imports("my.common.Ident")))
+      })
       .addMapping(CustomMapping.forSource { case s =>
         s.addParents(Superclass("MyTrait", Imports.empty, false))
       })
