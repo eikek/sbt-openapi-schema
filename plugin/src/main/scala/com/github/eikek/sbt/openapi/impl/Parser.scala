@@ -8,7 +8,7 @@ import io.swagger.v3.oas.models.media._
 import io.swagger.v3.parser.OpenAPIV3Parser
 
 object Parser {
-  private val parser = new OpenAPIV3Parser()
+  private val parser = new OpenAPIV3Parser
 
   def parse(file: String): Map[String, SingularSchemaClass] = {
     // see http://javadoc.io/doc/io.swagger.core.v3/swagger-models/2.0.7
