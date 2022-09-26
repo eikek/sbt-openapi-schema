@@ -14,7 +14,6 @@ addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmt
 val sharedSettings = Seq(
   name := "sbt-openapi-schema",
   organization := "com.github.eikek",
-  scalaVersion := "2.12.16",
   licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
   homepage := Some(url("https://github.com/eikek/sbt-openapi-schema")),
   Compile / console / scalacOptions := Seq(),
