@@ -1,7 +1,7 @@
 import Dependencies._
 import ReleaseTransformations._
 
-ThisBuild / scalaVersion := "2.12.16"
+ThisBuild / scalaVersion := "2.12.17"
 ThisBuild / versionScheme := Some("early-semver")
 
 addCommandAlias("ci", "; lint; test; scripted; publishLocal")
@@ -77,7 +77,7 @@ lazy val noPublish = Seq(
 
 lazy val testSettings = Seq(
   testFrameworks += new TestFramework("minitest.runner.Framework"),
-  libraryDependencies ++= Seq(minitest, `logback-classic`).map(_ % "test")
+  libraryDependencies ++= Seq(minitest).map(_ % "test")
 )
 
 val scalafixSettings = Seq(
