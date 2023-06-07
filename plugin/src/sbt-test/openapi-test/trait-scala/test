@@ -1,0 +1,11 @@
+# run the task
+> openapiCodegen
+$ exec cat target/scala-2.12/src_managed/main/org/myapi/Room.scala
+$ exec cat target/scala-2.12/src_managed/main/org/myapi/Pet.scala
+$ exists target/scala-2.12/src_managed/main/org/myapi/Room.scala
+# the code should compile
+> compile
+> run
+# run static doc generation
+> openapiStaticDoc
+$ exists target/scala-2.12/resource_managed/main/openapiDoc/index.html

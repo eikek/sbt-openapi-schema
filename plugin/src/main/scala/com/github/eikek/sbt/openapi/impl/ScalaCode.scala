@@ -60,30 +60,51 @@ object ScalaCode {
         constant("with") ~ forListSep(superclass, Part(", "))
       )
 
-    val fieldPart: PartConv[Field] =
+    val fieldPart: PartConv[Field] = {
+      val prefix = cfg.modelType match {
+        case ScalaModelType.CaseClass => ""
+        case ScalaModelType.Trait => "val "
+      }
       cond(
         f => f.nullablePrimitive,
-        fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
-        fieldName + PartConv.of(": ") + fieldType
+        PartConv.of(prefix) + fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
+        PartConv.of(prefix) + fieldName + PartConv.of(": ") + fieldType
       )
+    }
 
-    val internalCaseClass =
-      constant("case class") ~ sourceName ~ forList(annotation, _ ++ _)
-        .contramap[SourceFile](_.ctorAnnot) ~ constant("(") ++
-        forListSep(fieldPart, Part(", "))
-          .map(_.indent(2))
-          .contramap(_.fields.filterNot(_.prop.discriminator)) ++
-        constant(s") extends $enclosingTraitName")
+    val internalModel = cfg.modelType match {
+      case ScalaModelType.CaseClass =>
+        constant("case class") ~ sourceName ~ forList(annotation, _ ++ _)
+          .contramap[SourceFile](_.ctorAnnot) ~ constant("(") ++
+          forListSep(fieldPart, Part(", "))
+            .map(_.indent(2))
+            .contramap(_.fields.filterNot(_.prop.discriminator)) ++
+          constant(s") extends $enclosingTraitName")
+      case ScalaModelType.Trait =>
+        constant("trait") ~ sourceName ~ forList(annotation, _ ++ _)
+          .contramap[SourceFile](_.ctorAnnot) ~ constant(s"extends $enclosingTraitName") ~ constant("{") ++
+          forList(fieldPart, _ ++ _)
+            .map(_.indent(2))
+            .contramap(_.fields.filterNot(_.prop.discriminator)) ++
+          constant(s"}")
 
-    val internalCaseClasses: PartConv[SourceFile] =
-      forList(internalCaseClass, _ ++ _).contramap(_.internalSchemas)
+    }
+
+    val internalModels: PartConv[SourceFile] =
+      forList(internalModel, _ ++ _).contramap(_.internalSchemas)
+
+    val discriminantImports = cfg.modelType match {
+      case ScalaModelType.CaseClass =>
+        constant(
+          "implicit val customConfig: io.circe.generic.extras.Configuration = io.circe.generic.extras.Configuration.default.withDefaults.withDiscriminator(\""
+        ).map(_.indent(2)) + discriminantType + constant("\")")
+      case ScalaModelType.Trait =>
+        PartConv.empty[SourceFile]
+    }
 
     constant("object") ~ sourceName ~ forList(annotation, _ ++ _)
-      .contramap[SourceFile](_.ctorAnnot) ~ constant("{") ++
-      constant(
-        "implicit val customConfig: io.circe.generic.extras.Configuration = io.circe.generic.extras.Configuration.default.withDefaults.withDiscriminator(\""
-      ).map(_.indent(2)) + discriminantType + constant("\")") ++
-      internalCaseClasses.map(_.indent(2)) ++
+      .contramap[SourceFile](_.ctorAnnot) ~ constant("{") ++ discriminantImports ++
+      internalModels.map(_.indent(2)) ++
       cfg.json.companion.map(_.indent(2)) ++
       constant("}") ~ parents.map(_.newline).contramap(_.parents)
   }
@@ -128,6 +149,24 @@ object ScalaCode {
       constant(")") ~ parents.map(_.newline).contramap(_.parents)
   }
 
+  def traitCode: PartConv[SourceFile] = {
+    val fieldPart: PartConv[Field] =
+      cond(
+        f => f.nullablePrimitive,
+        PartConv.of("val ") + fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
+        PartConv.of("val ") + fieldName + PartConv.of(": ") + fieldType
+      )
+    val parents: PartConv[List[Superclass]] =
+      listSplit(
+        constant[Superclass]("extends") ~ superclass,
+        constant("with") ~ forListSep(superclass, Part(", "))
+      )
+    constant("trait") ~ sourceName ~ forList(annotation, _ ++ _)
+      .contramap[SourceFile](_.ctorAnnot) ~ parents.map(_.newline).contramap(_.parents) ~ constant("{") ++
+      forList(fieldPart, _ ++ _).map(_.indent(2)).contramap(_.fields) ++
+      constant("}")
+  }
+
   def fileHeader: PartConv[SourceFile] =
     pkg.contramap[SourceFile](_.pkg) ++
       imports.map(_.newline).contramap(_.imports) ++
@@ -135,11 +174,15 @@ object ScalaCode {
 
   def generate(sc: SchemaClass, pkg: Pkg, cfg: ScalaConfig): (String, String) =
     sc match {
-      case ssc: SingularSchemaClass =>
+      case _: SingularSchemaClass =>
         val src = resolveSchema(sc, cfg.mapping).copy(pkg = pkg).modify(cfg.json.resolve)
-        val conv = fileHeader ++ caseClass ++ cfg.json.companion
+        val scalaModel = cfg.modelType match {
+          case ScalaModelType.CaseClass => caseClass
+          case ScalaModelType.Trait => traitCode
+        }
+        val conv = fileHeader ++ scalaModel ++ cfg.json.companion
         (src.name, conv.toPart(src).render)
-      case dsc: DiscriminantSchemaClass =>
+      case _: DiscriminantSchemaClass =>
         val src = resolveSchema(sc, cfg.mapping).copy(pkg = pkg).modify(cfg.json.resolve)
         val conv = fileHeader ++ sealedTrait ++ enclosingObject(src.name, cfg)
         (src.name, conv.toPart(src).render)

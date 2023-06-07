@@ -1,0 +1,165 @@
+openapi: 3.0.0
+
+info:
+  title: Test Simple
+  version: 0.0.1
+
+servers:
+  - url: /api/v1
+    description: Current host
+
+paths:
+  /:
+    get:
+      summary: Nothing
+      responses:
+        200:
+          description: Ok
+
+components:
+  schemas:
+    Mapper:
+      required:
+        - id
+        - secondary
+      properties:
+        id:
+          type: string
+          format: ident
+        secondary:
+          type: array
+          items:
+            type: string
+            format: ident
+        fallback:
+          type: string
+          format: ident
+    Room:
+      description: |
+        A room with some properties.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        seats:
+          type: integer
+          format: int32
+
+    Person:
+      description: |
+        A person.
+      properties:
+        firstname:
+          description: |
+            The first name of the person.
+          type: string
+        lastname:
+          description: |
+            The last name of the person.
+          type: string
+        dob:
+          description: |
+            The date of birth of a person.
+          type: string
+          format: date
+
+    Course:
+      description: |
+        A course.
+      required:
+        - id
+        - starts
+        - room
+      properties:
+        id:
+          description: |
+            A unique id for this course.
+          type: string
+        starts:
+          description: |
+            The date when this course starts.
+          type: string
+          format: date
+        room:
+          $ref: '#/components/schemas/Room'
+        members:
+          description: |
+            A list of members currently enrolled in this course.
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+
+    NestedArray:
+      description: |
+        Test nested array.
+      properties:
+        matrix:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+              format: int32
+
+    ExtractedData1:
+      description: |
+        Contains data from extraction.
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Course'
+        description: |
+          Sibling values alongside `$ref` is not allowed. But the
+          swagger-codegen throws an error if the following type field
+          is not set.
+        type: string
+
+    ExtractedData2:
+      description: |
+        Contains data from extraction.
+      type: object
+      additionalProperties:
+        type: string
+
+    Pet:
+      type: object
+      discriminator:
+        propertyName: petType
+      properties:
+        name:
+          type: string
+        petType:
+          type: string
+      required:
+        - name
+        - petType
+    Cat:  ## "Cat" will be used as the discriminator value
+      description: A representation of a cat
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            huntingSkill:
+              type: string
+              description: The measured skill for hunting
+              enum:
+                - clueless
+                - lazy
+                - adventurous
+                - aggressive
+          required:
+            - huntingSkill
+    Dog:  ## "Dog" will be used as the discriminator value
+      description: A representation of a dog
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            packSize:
+              type: integer
+              format: int32
+              description: the size of the pack the dog is from
+              default: 0
+              minimum: 0
+          required:
+            - packSize
