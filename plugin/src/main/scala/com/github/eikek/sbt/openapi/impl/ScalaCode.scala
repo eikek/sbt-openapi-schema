@@ -63,11 +63,12 @@ object ScalaCode {
     val fieldPart: PartConv[Field] = {
       val prefix = cfg.modelType match {
         case ScalaModelType.CaseClass => ""
-        case ScalaModelType.Trait => "val "
+        case ScalaModelType.Trait     => "val "
       }
       cond(
         f => f.nullablePrimitive,
-        PartConv.of(prefix) + fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
+        PartConv.of(prefix) + fieldName + PartConv.of(": Option[") + fieldType + PartConv
+          .of("]"),
         PartConv.of(prefix) + fieldName + PartConv.of(": ") + fieldType
       )
     }
@@ -82,7 +83,9 @@ object ScalaCode {
           constant(s") extends $enclosingTraitName")
       case ScalaModelType.Trait =>
         constant("trait") ~ sourceName ~ forList(annotation, _ ++ _)
-          .contramap[SourceFile](_.ctorAnnot) ~ constant(s"extends $enclosingTraitName") ~ constant("{") ++
+          .contramap[SourceFile](_.ctorAnnot) ~ constant(
+          s"extends $enclosingTraitName"
+        ) ~ constant("{") ++
           forList(fieldPart, _ ++ _)
             .map(_.indent(2))
             .contramap(_.fields.filterNot(_.prop.discriminator)) ++
@@ -153,7 +156,8 @@ object ScalaCode {
     val fieldPart: PartConv[Field] =
       cond(
         f => f.nullablePrimitive,
-        PartConv.of("val ") + fieldName + PartConv.of(": Option[") + fieldType + PartConv.of("]"),
+        PartConv.of("val ") + fieldName + PartConv.of(": Option[") + fieldType + PartConv
+          .of("]"),
         PartConv.of("val ") + fieldName + PartConv.of(": ") + fieldType
       )
     val parents: PartConv[List[Superclass]] =
@@ -162,7 +166,9 @@ object ScalaCode {
         constant("with") ~ forListSep(superclass, Part(", "))
       )
     constant("trait") ~ sourceName ~ forList(annotation, _ ++ _)
-      .contramap[SourceFile](_.ctorAnnot) ~ parents.map(_.newline).contramap(_.parents) ~ constant("{") ++
+      .contramap[SourceFile](_.ctorAnnot) ~ parents
+      .map(_.newline)
+      .contramap(_.parents) ~ constant("{") ++
       forList(fieldPart, _ ++ _).map(_.indent(2)).contramap(_.fields) ++
       constant("}")
   }
@@ -178,7 +184,7 @@ object ScalaCode {
         val src = resolveSchema(sc, cfg.mapping).copy(pkg = pkg).modify(cfg.json.resolve)
         val scalaModel = cfg.modelType match {
           case ScalaModelType.CaseClass => caseClass
-          case ScalaModelType.Trait => traitCode
+          case ScalaModelType.Trait     => traitCode
         }
         val conv = fileHeader ++ scalaModel ++ cfg.json.companion
         (src.name, conv.toPart(src).render)

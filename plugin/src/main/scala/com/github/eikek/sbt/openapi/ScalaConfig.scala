@@ -5,8 +5,10 @@ case class ScalaConfig(
     json: ScalaJson = ScalaJson.none,
     modelType: ScalaModelType = ScalaModelType.CaseClass
 ) {
-  require(modelType == ScalaModelType.CaseClass || json == ScalaJson.none,
-    "Generating traits and ScalaJson is not supported.")
+  require(
+    modelType == ScalaModelType.CaseClass || json == ScalaJson.none,
+    "Generating traits and ScalaJson is not supported."
+  )
 
   def withJson(json: ScalaJson): ScalaConfig =
     copy(json = json)
