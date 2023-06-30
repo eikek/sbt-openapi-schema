@@ -6,8 +6,13 @@ import java.time._
 
 case class Ident(id: String)
 case class RoomImpl(name: String, seats: Option[Int]) extends Room
-case class PersonImpl(firstname: Option[String], lastname: Option[String], dob: Option[Instant]) extends Person
-case class MapperImpl(id: Ident, secondary: List[Ident], fallback: Option[Ident]) extends Mapper
+case class PersonImpl(
+    firstname: Option[String],
+    lastname: Option[String],
+    dob: Option[Instant]
+) extends Person
+case class MapperImpl(id: Ident, secondary: List[Ident], fallback: Option[Ident])
+    extends Mapper
 object PetImpl {
   case class Cat(huntingSkill: String, name: String) extends Pet.Cat
   case class Dog(packSize: Int, name: String) extends Pet.Dog
