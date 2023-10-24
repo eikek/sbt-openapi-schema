@@ -4,7 +4,7 @@ object Dependencies {
 
   val `swagger-parser` = "io.swagger.parser.v3" % "swagger-parser" % "2.1.18"
 
-  val swaggerCodegen = "io.swagger.codegen.v3" % "swagger-codegen-cli" % "3.0.46"
+  val swaggerCodegen = "io.swagger.codegen.v3" % "swagger-codegen-cli" % "3.0.49"
 
   // https://github.com/monix/minitest
   // Apache 2.0
