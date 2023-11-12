@@ -1,9 +1,9 @@
 package com.github.eikek.sbt.openapi
 
 import com.github.eikek.sbt.openapi.impl.{DiscriminantSchemaClass, SingularSchemaClass}
-import minitest.SimpleTestSuite
+import munit.FunSuite
 
-object OpenApiSchemaSpec extends SimpleTestSuite {
+class OpenApiSchemaSpec extends FunSuite {
 
   private val expectedResult = Seq(
     SingularSchemaClass(

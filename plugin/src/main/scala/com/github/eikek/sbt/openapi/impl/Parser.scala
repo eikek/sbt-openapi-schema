@@ -159,6 +159,12 @@ object Parser {
               "An object schema with value types `Object` and `AnyRef`, respectively, is not supported."
             )
         }
+      case s: ObjectSchema
+          if s.getAdditionalProperties == null && Option(s.getFormat).exists(
+            _.equalsIgnoreCase("json")
+          ) =>
+        Type.Json
+
       case s: MapSchema if s.getAdditionalProperties != null =>
         s.getAdditionalProperties match {
           case ps: Schema[_] =>

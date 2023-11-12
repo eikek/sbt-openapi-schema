@@ -27,6 +27,8 @@ object Type {
   case class Map(key: Type, value: Type) extends CollectionType
   case class Ref(name: String) extends PrimitiveType
 
+  case object Json extends PrimitiveType
+
   sealed trait TimeRepr
   object TimeRepr {
     case object Number extends TimeRepr

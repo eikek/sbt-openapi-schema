@@ -16,6 +16,15 @@ object ElmJson {
     def jsonCodec = PartConv.empty
   }
 
+  private def replaceJsonType(src: SourceFile): SourceFile = {
+    val jsonValue = TypeDef("Encode.Value", Imports.empty)
+    def isJson(f: Field) = f.typeDef.name.equalsIgnoreCase("json")
+
+    src.copy(fields =
+      src.fields.map(f => if (isJson(f)) f.copy(typeDef = jsonValue) else f)
+    )
+  }
+
   val decodePipeline = new ElmJson {
 
     sealed trait Direction {
@@ -31,13 +40,15 @@ object ElmJson {
     }
 
     def resolve(src: SourceFile): SourceFile =
-      src.addImports(
-        Imports(
-          "Json.Decode as Decode",
-          "Json.Decode.Pipeline as P",
-          "Json.Encode as Encode"
+      src
+        .addImports(
+          Imports(
+            "Json.Decode as Decode",
+            "Json.Decode.Pipeline as P",
+            "Json.Encode as Encode"
+          )
         )
-      )
+        .modify(replaceJsonType)
 
     private def codecForType(dir: Direction, pkg: Pkg, t: Type): Part = t match {
       case Type.Sequence(param) =>
@@ -62,6 +73,9 @@ object ElmJson {
         Part(s"${dir.name}.int")
       case Type.Date(Type.TimeRepr.Number) =>
         Part(s"${dir.name}.int")
+      case Type.Json =>
+        if (dir == Direction.Enc) Part("identity")
+        else Part("Decode.value")
       case _ =>
         Part(s"${dir.name}.string")
     }

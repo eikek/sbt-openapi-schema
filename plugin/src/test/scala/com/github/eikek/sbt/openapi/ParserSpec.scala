@@ -1,9 +1,9 @@
 package com.github.eikek.sbt.openapi
 
 import com.github.eikek.sbt.openapi.impl.Parser
-import minitest.SimpleTestSuite
+import munit.FunSuite
 
-object ParserSpec extends SimpleTestSuite {
+class ParserSpec extends FunSuite {
 
   test("Parsing out properties from discriminator schema") {
     val test1 = getClass.getResource("/test1.yml")

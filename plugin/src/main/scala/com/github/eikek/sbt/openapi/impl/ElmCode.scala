@@ -27,7 +27,8 @@ object ElmCode {
       Type.Date(Type.TimeRepr.String) -> TypeDef("String", Imports.empty),
       Type.Date(Type.TimeRepr.Number) -> TypeDef("Int", Imports.empty),
       Type.DateTime(Type.TimeRepr.String) -> TypeDef("String", Imports.empty),
-      Type.DateTime(Type.TimeRepr.Number) -> TypeDef("Int", Imports.empty)
+      Type.DateTime(Type.TimeRepr.Number) -> TypeDef("Int", Imports.empty),
+      Type.Json -> TypeDef("Json", Imports.empty)
     )
 
   def emptyValue(pkg: Pkg): PartConv[TypeDef] =
@@ -39,6 +40,7 @@ object ElmCode {
       case TypeDef(n, _) if n.startsWith("Maybe") => Part("Nothing")
       case TypeDef(n, _) if n.startsWith("(List") => Part("[]")
       case TypeDef(n, _) if n.startsWith("(Dict") => Part("Dict.empty")
+      case TypeDef("Encode.Value", _)             => Part("Encode.null")
       case TypeDef(name, _)                       => Part(s"${pkg.name}.$name.empty")
     }
 
