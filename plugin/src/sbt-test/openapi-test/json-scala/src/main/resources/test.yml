@@ -100,3 +100,19 @@ components:
       type: object
       additionalProperties:
         type: string
+
+    CustomJson:
+      description: |
+        Some data with arbitrary json.
+      properties:
+        name:
+          type: string
+        maybeData:
+          type: object
+          format: json
+        data:
+          type: object
+          format: json
+      required:
+        - name
+        - data

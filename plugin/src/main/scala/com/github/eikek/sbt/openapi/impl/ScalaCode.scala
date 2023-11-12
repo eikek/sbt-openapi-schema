@@ -30,7 +30,8 @@ object ScalaCode {
       Type.DateTime(Type.TimeRepr.Number) -> TypeDef(
         "LocalDateTime",
         Imports("java.time.LocalDateTime")
-      )
+      ),
+      Type.Json -> TypeDef("Json", Imports.empty)
     )
 
   def defaultTypeMapping(cm: CustomMapping): TypeMapping = {

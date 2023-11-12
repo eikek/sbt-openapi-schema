@@ -1,9 +1,9 @@
 package com.github.eikek.sbt.openapi.impl
 
-import com.github.eikek.sbt.openapi._
-import minitest.SimpleTestSuite
+import com.github.eikek.sbt.openapi.*
+import munit.FunSuite
 
-object ScalaCodeSpec extends SimpleTestSuite {
+class ScalaCodeSpec extends FunSuite {
 
   test("Discriminant Schema") {
     val schemaClass = DiscriminantSchemaClass(

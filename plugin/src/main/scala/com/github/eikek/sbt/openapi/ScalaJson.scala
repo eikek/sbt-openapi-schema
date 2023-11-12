@@ -16,6 +16,15 @@ object ScalaJson {
     def resolve(src: SourceFile): SourceFile = src
   }
 
+  private def replaceJsonType(src: SourceFile): SourceFile = {
+    val circeJson = TypeDef("io.circe.Json", Imports.empty)
+    def isJson(f: Field) = f.typeDef.name.equalsIgnoreCase("json")
+
+    src.copy(fields =
+      src.fields.map(f => if (isJson(f)) f.copy(typeDef = circeJson) else f)
+    )
+  }
+
   val circeSemiauto = new ScalaJson {
     val props: PartConv[SourceFile] =
       constant("object") ~ sourceName ~ constant("{") ++
@@ -53,7 +62,7 @@ object ScalaJson {
       cond(_.wrapper, wrapper, props)
 
     def resolve(src: SourceFile): SourceFile =
-      src
+      src.modify(replaceJsonType)
   }
 
   val circeSemiautoExtra = new ScalaJson {
@@ -113,6 +122,6 @@ object ScalaJson {
         .contramap[SourceFile](_.internalSchemas) ++ discriminantProps
 
     override def resolve(src: SourceFile): SourceFile =
-      src
+      src.modify(replaceJsonType)
   }
 }

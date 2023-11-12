@@ -1,13 +1,21 @@
 import sbt._
 
 object Dependencies {
+  object V {
+    val munitVersion = "0.7.29"
+    val munitCatsEffectVersion = "1.0.7"
+    val swaggerParser = "2.1.18"
+    val swaggerCodegen = "3.0.50"
+  }
 
-  val `swagger-parser` = "io.swagger.parser.v3" % "swagger-parser" % "2.1.18"
+  val munit = Seq(
+    "org.scalameta" %% "munit" % V.munitVersion,
+    "org.scalameta" %% "munit-scalacheck" % V.munitVersion,
+    "org.typelevel" %% "munit-cats-effect-3" % V.munitCatsEffectVersion
+  )
 
-  val swaggerCodegen = "io.swagger.codegen.v3" % "swagger-codegen-cli" % "3.0.50"
+  val `swagger-parser` = "io.swagger.parser.v3" % "swagger-parser" % V.swaggerParser
 
-  // https://github.com/monix/minitest
-  // Apache 2.0
-  val minitest = "io.monix" %% "minitest" % "2.9.6"
-  val `minitest-laws` = "io.monix" %% "minitest-laws" % "2.7.0"
+  val swaggerCodegen = "io.swagger.codegen.v3" % "swagger-codegen-cli" % V.swaggerCodegen
+
 }

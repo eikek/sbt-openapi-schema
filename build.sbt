@@ -11,6 +11,11 @@ addCommandAlias(
 )
 addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmtAll")
 
+val testSettings = Seq(
+  libraryDependencies ++= Dependencies.munit.map(_ % Test),
+  testFrameworks += TestFrameworks.MUnit
+)
+
 val sharedSettings = Seq(
   name := "sbt-openapi-schema",
   organization := "com.github.eikek",
@@ -72,11 +77,6 @@ lazy val noPublish = Seq(
   publish := {},
   publishLocal := {},
   publishArtifact := false
-)
-
-lazy val testSettings = Seq(
-  testFrameworks += new TestFramework("minitest.runner.Framework"),
-  libraryDependencies ++= Seq(minitest).map(_ % "test")
 )
 
 val scalafixSettings = Seq(

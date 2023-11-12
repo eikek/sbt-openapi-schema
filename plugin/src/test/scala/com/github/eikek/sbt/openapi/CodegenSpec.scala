@@ -1,9 +1,9 @@
 package com.github.eikek.sbt.openapi
 
-import com.github.eikek.sbt.openapi.impl._
-import minitest._
+import com.github.eikek.sbt.openapi.impl.*
+import munit.FunSuite
 
-object CodegenSpec extends SimpleTestSuite {
+class CodegenSpec extends FunSuite {
 
   val test1 = getClass.getResource("/test1.yml")
   val schema = Parser.parse(test1.toString)
