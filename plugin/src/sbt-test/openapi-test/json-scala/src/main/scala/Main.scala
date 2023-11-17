@@ -29,7 +29,13 @@ object Main {
       )
     )
     testJson(ExtractedData2Dto(Map("c1" -> "v1", "c2" -> "v2")))
-    testJson(CustomJsonDto("a name", Some(Json.obj("test" -> Json.fromInt(5))), Json.fromString("help")))
+    testJson(
+      CustomJsonDto(
+        "a name",
+        Some(Json.obj("test" -> Json.fromInt(5))),
+        Json.fromString("help")
+      )
+    )
   }
 
   def testJson[A](a: A)(implicit d: Decoder[A], e: Encoder[A]): Unit = {
