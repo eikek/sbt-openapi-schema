@@ -1,7 +1,7 @@
 import Dependencies._
 import ReleaseTransformations._
 
-ThisBuild / scalaVersion := "2.12.18"
+ThisBuild / scalaVersion := "2.12.19"
 ThisBuild / versionScheme := Some("early-semver")
 
 addCommandAlias("ci", "; lint; test; scripted; publishLocal")
