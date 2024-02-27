@@ -2,7 +2,7 @@ import com.github.eikek.sbt.openapi._
 
 name := "sbt-openapi-simple-test"
 version := "0.0.1"
-scalaVersion := "2.12.18"
+scalaVersion := "2.12.19"
 
 libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % "0.11.1",
