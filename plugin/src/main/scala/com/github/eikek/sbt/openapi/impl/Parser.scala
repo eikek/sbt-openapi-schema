@@ -136,7 +136,7 @@ object Parser {
         s.getFormat.nullToEmpty.toLowerCase match {
           case "float"  => Type.Float32
           case "double" => Type.Float64
-          case _        => sys.error(s"Unsupported number type: $s")
+          case _        => Type.BigDecimal
         }
       case _: PasswordSchema =>
         Type.String

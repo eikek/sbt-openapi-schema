@@ -44,6 +44,15 @@ components:
           type: string
           format: date
 
+    AnyNumber:
+      description: |
+        A number, but nothing specific.
+      required:
+        - limit
+      properties:
+        limit:
+          type: number
+
     Course:
       description: |
         A course.

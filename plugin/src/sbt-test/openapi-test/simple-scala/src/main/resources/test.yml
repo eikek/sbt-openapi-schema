@@ -46,6 +46,15 @@ components:
           type: integer
           format: int32
 
+    AnyNumber:
+      description: |
+        A number, but nothing specific.
+      required:
+        - limit
+      properties:
+        limit:
+          type: number
+
     Person:
       description: |
         A person.

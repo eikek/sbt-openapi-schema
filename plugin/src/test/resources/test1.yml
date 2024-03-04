@@ -116,6 +116,13 @@ components:
         Just a string, actually.
       type: string
 
+    AnyNumber:
+      description: |
+        A number, but not specific.
+      properties:
+        limit:
+          type: number
+
     DiscriminatorObject:
       type: object
       discriminator:
