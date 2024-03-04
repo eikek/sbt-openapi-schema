@@ -176,6 +176,21 @@ object Parser {
         }
       case s if s.get$ref != null =>
         Type.Ref(s.get$ref.split('/').last)
+
+      case cs: ComposedSchema
+          if Option(cs.getAllOf()).exists(_.size == 1) ||
+            Option(cs.getAnyOf()).exists(_.size == 1) ||
+            Option(cs.getOneOf()).exists(_.size == 1) =>
+        def getFirst(l: java.util.List[Schema[_]]) =
+          Option(l).filter(!_.isEmpty).map(_.get(0))
+
+        val singleEntry = getFirst(cs.getAllOf())
+          .orElse(getFirst(cs.getAnyOf()))
+          .orElse(getFirst(cs.getOneOf()))
+          .getOrElse(sys.error("No single schema found"))
+
+        schemaType(singleEntry)
+
       case _ =>
         sys.error(s"Unsupported schema: $sch")
     }
