@@ -34,6 +34,13 @@ object OpenApiSchema extends AutoPlugin {
       settingKey[Language]("The target language: either Language.Scala or Language.Elm.")
     val openapiOutput = settingKey[File]("The directory where files are generated")
     val openapiCodegen = taskKey[Seq[File]]("Run the code generation")
+
+    val openapiRedoclyConfig =
+      settingKey[Option[File]]("The config file to use for redocly/cli")
+    val openapiRedoclyCmd = settingKey[Seq[String]](
+      "The redocli-cli command to use. Defaults to ['npx', '@redocly/cli']."
+    )
+
     val openapiStaticDoc = taskKey[File]("Generate a static HTML documentation")
     val openapiStaticGen = settingKey[OpenApiDocGenerator](
       "The documentation generator to user. Possible values OpenApiDocGenerator.[Swagger,Redoc]. Default is Swagger, because Redoc requires Nodejs installed."
@@ -41,7 +48,7 @@ object OpenApiSchema extends AutoPlugin {
     val openapiStaticOut =
       settingKey[File]("The target directory for static documentation")
     val openapiLint = taskKey[Unit](
-      "Runs the redoc openapi-cli linter against the openapi spec. Requires nodejs installed"
+      "Runs the redoc openapi-cli linter against the openapi spec."
     )
   }
 
@@ -57,6 +64,8 @@ object OpenApiSchema extends AutoPlugin {
         case _            => (Compile / sourceManaged).value
       }
     },
+    openapiRedoclyCmd := Seq("npx", "@redocly/cli"),
+    openapiRedoclyConfig := None,
     openapiCodegen := {
       val out = openapiOutput.value
       val logger = streams.value.log
@@ -74,12 +83,16 @@ object OpenApiSchema extends AutoPlugin {
       val out = openapiStaticOut.value
       val spec = openapiSpec.value
       val gen = openapiStaticGen.value
-      createOpenapiStaticDoc(logger, spec, gen, out)
+      val config = openapiRedoclyConfig.value
+      val redocly = openapiRedoclyCmd.value
+      createOpenapiStaticDoc(logger, spec, gen, out, redoclyCmd(redocly, config))
     },
     openapiLint := {
       val logger = streams.value.log
       val spec = openapiSpec.value
-      runOpenapiLinter(logger, spec)
+      val config = openapiRedoclyConfig.value
+      val redocly = openapiRedoclyCmd.value
+      runOpenapiLinter(logger, spec, redoclyCmd(redocly, config))
     }
   )
 
@@ -165,23 +178,32 @@ object OpenApiSchema extends AutoPlugin {
     singularSchemas ++ discriminantSchemas
   }
 
+  private def redoclyCmd(base: Seq[String], config: Option[File]): Seq[String] =
+    config.map(c => base ++ Seq("--config", c.toString)).getOrElse(base)
+
   def createOpenapiStaticDoc(
       logger: Logger,
       openapi: File,
       gen: OpenApiDocGenerator,
-      out: File
+      out: File,
+      redoclyCmd: Seq[String]
   ): File =
     gen match {
       case OpenApiDocGenerator.Swagger =>
         createOpenapiStaticDocSwagger(logger, openapi, out)
       case OpenApiDocGenerator.Redoc =>
-        createOpenapiStaticDocRedoc(logger, openapi, out)
+        createOpenapiStaticDocRedoc(logger, openapi, out, redoclyCmd)
     }
 
-  def createOpenapiStaticDocRedoc(logger: Logger, openapi: File, out: File): File = {
+  def createOpenapiStaticDocRedoc(
+      logger: Logger,
+      openapi: File,
+      out: File,
+      redoclyCmd: Seq[String]
+  ): File = {
     logger.info("Generating static documentation for openapi spec via redoc…")
     val outFile = out / "index.html"
-    val cmd = Seq("npx", "redoc-cli", "bundle", openapi.toString, "-o", outFile.toString)
+    val cmd = redoclyCmd ++ Seq("bundle", openapi.toString, "-o", outFile.toString)
     Sys(logger).execSuccess(cmd)
     if (!out.exists) {
       sys.error("Generation did not produce a file")
@@ -219,8 +241,8 @@ object OpenApiSchema extends AutoPlugin {
     file
   }
 
-  def runOpenapiLinter(logger: Logger, openapi: File): Unit =
-    Sys(logger).execSuccess(Seq("npx", "@redocly/cli", "lint", openapi.toString))
+  def runOpenapiLinter(logger: Logger, openapi: File, redoclyCmd: Seq[String]): Unit =
+    Sys(logger).execSuccess(redoclyCmd ++ Seq("lint", openapi.toString))
 
   final case class Stopwatch(start: Long) {
     def isBelow(fd: FiniteDuration): Boolean =
