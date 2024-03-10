@@ -1,6 +1,6 @@
 package com.github.eikek.sbt.openapi
 
-import com.github.eikek.sbt.openapi.impl.*
+import com.github.eikek.sbt.openapi.impl._
 import munit.FunSuite
 
 class CodegenSpec extends FunSuite {
