@@ -203,7 +203,7 @@ object OpenApiSchema extends AutoPlugin {
   ): File = {
     logger.info("Generating static documentation for openapi spec via redoc…")
     val outFile = out / "index.html"
-    val cmd = redoclyCmd ++ Seq("bundle", openapi.toString, "-o", outFile.toString)
+    val cmd = redoclyCmd ++ Seq("build-docs", openapi.toString, "-o", outFile.toString)
     Sys(logger).execSuccess(cmd)
     if (!out.exists) {
       sys.error("Generation did not produce a file")
