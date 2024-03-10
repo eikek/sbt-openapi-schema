@@ -21,6 +21,7 @@ object ElmCode {
       Type.Int64 -> TypeDef("Int", Imports.empty),
       Type.Float32 -> TypeDef("Float", Imports.empty),
       Type.Float64 -> TypeDef("Float", Imports.empty),
+      Type.BigDecimal -> TypeDef("Float", Imports.empty),
       Type.Uuid -> TypeDef("String", Imports.empty),
       Type.Url -> TypeDef("String", Imports.empty),
       Type.Uri -> TypeDef("String", Imports.empty),
