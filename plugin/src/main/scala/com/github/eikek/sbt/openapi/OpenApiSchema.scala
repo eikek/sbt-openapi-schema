@@ -220,7 +220,7 @@ object OpenApiSchema extends AutoPlugin {
   }
 
   def runOpenapiLinter(logger: Logger, openapi: File): Unit =
-    Sys(logger).execSuccess(Seq("npx", "@redocly/openapi-cli", "lint", openapi.toString))
+    Sys(logger).execSuccess(Seq("npx", "@redocly/cli", "lint", openapi.toString))
 
   final case class Stopwatch(start: Long) {
     def isBelow(fd: FiniteDuration): Boolean =

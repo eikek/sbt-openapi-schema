@@ -12,6 +12,7 @@ object ScalaCode {
       Type.Int64 -> TypeDef("Long", Imports.empty),
       Type.Float32 -> TypeDef("Float", Imports.empty),
       Type.Float64 -> TypeDef("Double", Imports.empty),
+      Type.BigDecimal -> TypeDef("BigDecimal", Imports.empty),
       Type.Uuid -> TypeDef("UUID", Imports("java.util.UUID")),
       Type.Url -> TypeDef("URL", Imports("java.net.URL")),
       Type.Uri -> TypeDef("URI", Imports("java.net.URI")),
@@ -91,7 +92,6 @@ object ScalaCode {
             .map(_.indent(2))
             .contramap(_.fields.filterNot(_.prop.discriminator)) ++
           constant(s"}")
-
     }
 
     val internalModels: PartConv[SourceFile] =
