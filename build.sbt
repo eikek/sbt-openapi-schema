@@ -81,8 +81,7 @@ lazy val noPublish = Seq(
 
 val scalafixSettings = Seq(
   semanticdbEnabled := true, // enable SemanticDB
-  semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
-  ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
+  semanticdbVersion := scalafixSemanticdb.revision // use Scalafix compatible version
 )
 
 lazy val plugin = project
