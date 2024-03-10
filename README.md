@@ -1,6 +1,6 @@
 # SBT OpenApi Schema Codegen
 
-[![Build Status](https://img.shields.io/github/workflow/status/eikek/sbt-openapi-schema/CI?style=flat-square)](https://github.com/eikek/sbt-openapi-schema/actions/workflows/ci.yml)
+[![CI](https://github.com/eikek/sbt-openapi-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/eikek/sbt-openapi-schema/actions/workflows/ci.yml)
 [![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
 [![License](https://img.shields.io/github/license/eikek/sbt-openapi-schema.svg?style=flat-square&color=steelblue)](https://github.com/eikek/sbt-openapi-schema/blob/master/LICENSE.txt)
 
@@ -29,7 +29,7 @@ It is possible to customize the code generation.
 Add this plugin to your build in `project/plugins.sbt`:
 
 ```
-addSbtPlugin("com.github.eikek" % "sbt-openapi-schema" % "0.5.0")
+addSbtPlugin("com.github.eikek" % "sbt-openapi-schema" % "x.y.z")
 ```
 
 Please check the git tags or maven central for the current version.
