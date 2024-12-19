@@ -5,7 +5,7 @@ object Dependencies {
     val munitVersion = "1.0.3"
     val munitCatsEffectVersion = "2.0.0"
     val swaggerParser = "2.1.24"
-    val swaggerCodegen = "3.0.64"
+    val swaggerCodegen = "3.0.65"
   }
 
   val munit = Seq(
