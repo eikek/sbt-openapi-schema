@@ -95,10 +95,9 @@ lazy val plugin = project
   .settings(
     sbtPlugin := true,
     libraryDependencies ++= Seq(`swagger-parser`, swaggerCodegen),
-    scriptedLaunchOpts := {
+    scriptedLaunchOpts :=
       scriptedLaunchOpts.value ++
-        Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
-    },
+        Seq("-Xmx1024M", "-Dplugin.version=" + version.value),
     scriptedBufferLog := false
   )
 
