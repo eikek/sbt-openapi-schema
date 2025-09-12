@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
   object V {
-    val munitVersion = "1.1.0"
+    val munitVersion = "1.1.2"
     val munitCatsEffectVersion = "2.1.0"
     val swaggerParser = "2.1.29"
     val swaggerCodegen = "3.0.68"
