@@ -2,7 +2,7 @@ import com.github.eikek.sbt.openapi._
 
 name := "sbt-openapi-simple-scala-test"
 version := "0.0.1"
-scalaVersion := "2.12.20"
+scalaVersion := "2.12.21"
 
 enablePlugins(OpenApiSchema)
 openapiTargetLanguage := Language.Scala
