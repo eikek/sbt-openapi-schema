@@ -4,7 +4,7 @@ case class Part(cnt: String) {
   def ++(p: Part): Part =
     render match {
       case "" => p
-      case s =>
+      case s  =>
         p.render match {
           case "" => this
           case s2 => Part(s + "\n" + s2)
@@ -37,7 +37,7 @@ case class Part(cnt: String) {
 
   def semicolon: Part = render match {
     case "" => this
-    case s =>
+    case s  =>
       Part(
         s.split('\n').toList.map(l => if (l.endsWith(";")) l else l + ";").mkString("\n")
       )
