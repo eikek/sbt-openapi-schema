@@ -4,7 +4,7 @@ object Dependencies {
   object V {
     val munitVersion = "1.1.0"
     val munitCatsEffectVersion = "2.1.0"
-    val swaggerParser = "2.1.29"
+    val swaggerParser = "2.1.34"
     val swaggerCodegen = "3.0.68"
   }
 
