@@ -26,13 +26,17 @@ object OpenApiSchema extends AutoPlugin {
     }
 
     val openapiSpec = settingKey[File]("The openapi specification")
-    val openapiPackage = settingKey[Pkg]("The package to place the generated files into")
+    val openapiPackage =
+      settingKey[com.github.eikek.sbt.openapi.Pkg](
+        "The package to place the generated files into"
+      )
     val openapiScalaConfig =
       settingKey[ScalaConfig]("Configuration for generating scala files")
     val openapiElmConfig = settingKey[ElmConfig]("Configuration for generating elm files")
     val openapiTargetLanguage =
       settingKey[Language]("The target language: either Language.Scala or Language.Elm.")
     val openapiOutput = settingKey[File]("The directory where files are generated")
+    @transient // must not be cached (sbt 2)
     val openapiCodegen = taskKey[Seq[File]]("Run the code generation")
 
     val openapiRedoclyConfig =
@@ -41,12 +45,14 @@ object OpenApiSchema extends AutoPlugin {
       "The redocli-cli command to use. Defaults to ['npx', '@redocly/cli']."
     )
 
+    @transient // must not be cached (sbt 2)
     val openapiStaticDoc = taskKey[File]("Generate a static HTML documentation")
     val openapiStaticGen = settingKey[OpenApiDocGenerator](
       "The documentation generator to user. Possible values OpenApiDocGenerator.[Swagger,Redoc]. Default is Swagger, because Redoc requires Nodejs installed."
     )
     val openapiStaticOut =
       settingKey[File]("The target directory for static documentation")
+    @transient // must not be cached (sbt 2)
     val openapiLint = taskKey[Unit](
       "Runs the redoc openapi-cli linter against the openapi spec."
     )
@@ -55,7 +61,7 @@ object OpenApiSchema extends AutoPlugin {
   import autoImport._
 
   val defaultSettings = Seq(
-    openapiPackage := Pkg("org.myapi"),
+    openapiPackage := com.github.eikek.sbt.openapi.Pkg("org.myapi"),
     openapiScalaConfig := ScalaConfig(),
     openapiElmConfig := ElmConfig(),
     openapiOutput := {
@@ -111,7 +117,7 @@ object OpenApiSchema extends AutoPlugin {
       cfgScala: ScalaConfig,
       cfgElm: ElmConfig,
       spec: File,
-      pkg: Pkg
+      pkg: com.github.eikek.sbt.openapi.Pkg
   ): Seq[File] = {
 
     val targetPath = pkg.name.split('.').foldLeft(out)(_ / _)

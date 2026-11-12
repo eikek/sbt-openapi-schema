@@ -12,6 +12,6 @@ trait TypeMapping { self =>
 object TypeMapping {
   def apply(t: (Type, TypeDef), ts: (Type, TypeDef)*): TypeMapping = {
     val m = (t :: ts.toList).toMap
-    t: Type => m.get(t)
+    (t: Type) => m.get(t)
   }
 }
