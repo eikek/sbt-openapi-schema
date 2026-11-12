@@ -1,6 +1,6 @@
 package com.github.eikek.sbt.openapi.impl
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import com.github.eikek.sbt.openapi._
 import com.github.eikek.sbt.openapi.impl.StringUtil._
